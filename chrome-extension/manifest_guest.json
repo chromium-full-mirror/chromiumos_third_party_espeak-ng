@@ -1,0 +1,24 @@
+{
+  "name": "eSpeakNG text-to-speech extension",
+  "manifest_version": 2,
+  "version": "0.0.1",
+  "options_page": "options.html",
+  "background": {
+    "scripts": [
+      "language_defaults.js",
+      "js/espeakng.js",
+      "espeak_tts_engine.js"
+    ],
+    "persistent": false
+  },
+  "permissions": [
+    "storage",
+    "ttsEngine"
+  ],
+  "description": "A free text-to-speech engine that supports many languages.",
+  "tts_engine": {
+    "voices": [
+    ]
+  },
+  incognito: "split"
+}
