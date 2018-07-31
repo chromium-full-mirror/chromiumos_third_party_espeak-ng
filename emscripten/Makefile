@@ -47,14 +47,8 @@ EM_VIRTUAL_PATH_ESPEAKNG_DATA=/usr/share/espeak-ng-data
 EM_WEBIDL_BINDER=python $(EMSCRIPTEN)/tools/webidl_binder.py
 EM_FILE_PACKAGER=python $(EMSCRIPTEN)/tools/file_packager.py
 
-# NOTE: libespeak-ng.so (Linux) or libespeak-ng.dylib (macOS) compiled to LLVM IR code
-EM_LIBESPEAKNG_SO=$(wildcard ../src/.libs/libespeak-ng.so)
-EM_LIBESPEAKNG_DYLIB=$(wildcard ../src/.libs/libespeak-ng.dylib)
-ifneq ($(EM_LIBESPEAKNG_DYLIB),)
-	EM_LIBESPEAKNG=$(EM_LIBESPEAKNG_DYLIB)
-else ifneq ($(EM_LIBESPEAKNG_SO),)
-	EM_LIBESPEAKNG=$(EM_LIBESPEAKNG_SO)
-endif
+# NOTE: libespeak-ng.a (static library) compiled to LLVM IR code
+EM_LIBESPEAKNG=../src/.libs/libespeak-ng.a
 
 # NOTE: glue code files
 EM_GLUE_PREFIX=glue
@@ -100,7 +94,7 @@ CXXFLAGS+=-I ./ -I ../ -I ../src/include/espeak-ng
 #CXXFLAGS+=-s USE_PTHREADS=1
 
 # NOTE: extra flags for emscripten
-EM_CXXFLAGS=-s RESERVED_FUNCTION_POINTERS=2 --memory-init-file 0
+EM_CXXFLAGS=-s RESERVED_FUNCTION_POINTERS=2 --memory-init-file 0 -s FORCE_FILESYSTEM=1 -s WASM=1
 
 
 
