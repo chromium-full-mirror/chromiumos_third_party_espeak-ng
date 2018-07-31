@@ -5,10 +5,17 @@ You can either install emscripten locally, or use docker. I found
 it easier to use this docker image:
   https://github.com/apiaryio/emscripten-docker
 
+You don't have to install the image first, just make sure docker is installed
+and in your path, and the commands below will download and use the image
+automatically.
+
 These instructions are only slightly different than emscripten/README.md.
 The main difference is running autoreconf -fvi before autogen.sh,
 because otherwise autogen.sh will make symlinks to some GNU autotools
 files that won't be available to the docker image.
+
+# These commands assume bash
+bash
 
 # Build espeak normally first
 autoreconf -fvi
@@ -21,18 +28,25 @@ cd src/ucd-tools
 autoreconf -fvi
 ./autogen.sh
 cd ../..
-bash
-docker run --rm -v $(pwd):/src -ti apiaryio/emcc /bin/bash
-  cd src/ucd-tools
-  emconfigure ./configure
-  emmake make
+docker run --rm -v $(pwd):/src -w /src/src/ucd-tools -ti apiaryio/emcc emconfigure ./configure
+docker run --rm -v $(pwd):/src -w /src/src/ucd-tools -ti apiaryio/emcc emmake make
 
 # Build emscripten version of espeak-ng
-autoreconf -fvi
-./autogen.sh
+docker run --rm -v $(pwd):/src -w /src -ti apiaryio/emcc emconfigure ./configure --prefix=/usr --without-async --without-mbrola --without-sonic
+docker run --rm -v $(pwd):/src -w /src -ti apiaryio/emcc emmake make src/libespeak-ng.la
+docker run --rm -v $(pwd):/src -w /src/emscripten -ti apiaryio/emcc emmake make
 
-docker run --rm -v $(pwd):/src -ti apiaryio/emcc /bin/bash
-  emconfigure ./configure --prefix=/usr --without-async --without-mbrola --without-sonic
-  emmake make src/libespeak-ng.la
-  cd emscripten
-  emmake make
+# The generated files will go here:
+emscripten/js/espeakng.js
+emscripten/js/espeakng.worker.data
+emscripten/js/espeakng.worker.js
+emscripten/js/espeakng.worker.wasm
+
+# Copy those files to the Chrome extension directory:
+cp emscripten/js/espeakng* chrome-extension/js/
+
+# To test, open chrome://extensions in Chrome, enable Developer mode, click Load unpacked,
+# and point it to the chrome-extension directory.
+
+# To update Chrome OS, see these docs:
+https://chromium.googlesource.com/chromium/src/+/lkgr/docs/accessibility/patts.md
