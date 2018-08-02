@@ -48,5 +48,12 @@ cp emscripten/js/espeakng* chrome-extension/js/
 # To test, open chrome://extensions in Chrome, enable Developer mode, click Load unpacked,
 # and point it to the chrome-extension directory.
 
-# To update Chrome OS, see these docs:
-https://chromium.googlesource.com/chromium/src/+/lkgr/docs/accessibility/patts.md
+# To update the package on Chrome OS, first export a tarball:
+git archive chrome --prefix=espeak-ng/ | gzip > espeak-ng-1.49.3-3.tar.gz
+
+# Next, upload this file to chromeos-localmirror/distfiles and make it
+# world-readable.
+#
+# Then, in the Chromium OS codebase, update the ebuild here to refer to
+# the new version:
+third_party/chromiumos-overlay/app-accessibility/espeak-ng
