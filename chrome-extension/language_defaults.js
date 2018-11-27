@@ -36,91 +36,96 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "gmw/en-US":  // English (America)
       return false;
 
-    // Allowed languages.
+    // These languages are not supported by Chrome OS UI,
+    // so don't include them by default.
     case "gmw/af":  // Afrikaans
     case "sem/am":  // Amharic
     case "roa/an":  // Aragonese
-    case "sem/ar":  // Arabic
     case "inc/as":  // Assamese
     case "trk/az":  // Azerbaijani
-    case "zls/bg":  // Bulgarian
-    case "inc/bn":  // Bengali
-    case "inc/bpy":  // Bishnupriya Manipuri
     case "zls/bs":  // Bosnian
-    case "roa/ca":  // Catalan
-    case "sit/cmn":  // Chinese (Mandarin)
-    case "zlw/cs":  // Czech
-    case "cel/cy":  // Welsh
-    case "gmq/da":  // Danish
-    case "grk/el":  // Greek
+    case "inc/bpy":  // Bishnupriya Manipuri
+    case "grk/grc":  // Greek (Ancient)
     case "art/eo":  // Esperanto
-    case "urj/et":  // Estonian
     case "eu":  // Basque
-    case "ira/fa":  // Persian
     case "ira/fa-Latn":  // Persian (Pinglish)
-    case "urj/fi":  // Finnish
     case "cel/ga":  // Gaelic (Irish)
     case "cel/gd":  // Gaelic (Scottish)
     case "sai/gn":  // Guarani
-    case "grk/grc":  // Greek (Ancient)
-    case "inc/gu":  // Gujarati
     case "sit/hak":  // Hakka Chinese
-    case "zls/hr":  // Croatian
-    case "urj/hu":  // Hungarian
     case "ine/hy":  // Armenian (East Armenia)
     case "ine/hyw":  // Armenian (West Armenia)
     case "art/ia":  // Interlingua
     case "gmq/is":  // Icelandic
-    case "jpx/ja":  // Japanese
     case "art/jbo":  // Lojban
     case "ccs/ka":  // Georgian
     case "esx/kl":  // Greenlandic
-    case "dra/kn":  // Kannada
     case "inc/kok":  // Konkani
     case "ira/ku":  // Kurdish
     case "trk/ky":  // Kyrgyz
     case "itc/la":  // Latin
     case "art/lfn":  // Lingua Franca Nova
-    case "bat/lt":  // Lithuanian
-    case "bat/lv":  // Latvian
     case "poz/mi":  // Māori
     case "zls/mk":  // Macedonian
-    case "dra/ml":  // Malayalam
-    case "inc/mr":  // Marathi
-    case "poz/ms":  // Malay
     case "sem/mt":  // Maltese
     case "sit/my":  // Myanmar (Burmese)
-    case "gmq/nb":  // Norwegian Bokmål
     case "azc/nci":  // Nahuatl (Classical)
     case "inc/ne":  // Nepali
     case "cus/om":  // Oromo
     case "inc/or":  // Oriya
     case "inc/pa":  // Punjabi
     case "roa/pap":  // Papiamento
-    case "zlw/pl":  // Polish
-    case "roa/ro":  // Romanian
-    case "zle/ru":  // Russian
     case "inc/sd":  // Sindhi
     case "inc/si":  // Sinhala
-    case "zlw/sk":  // Slovak
-    case "zls/sl":  // Slovenian
     case "ine/sq":  // Albanian
-    case "zls/sr":  // Serbian
     case "gmq/sv":  // Swedish
-    case "bnt/sw":  // Swahili
-    case "dra/ta":  // Tamil
-    case "dra/te":  // Telugu
     case "bnt/tn":  // Setswana
-    case "trk/tr":  // Turkish
     case "trk/tt":  // Tatar
     case "inc/ur":  // Urdu
-    case "aav/vi":  // Vietnamese (Northern)
+    case "cel/cy":  // Welsh
     case "aav/vi-VN-x-central":  // Vietnamese (Central)
     case "aav/vi-VN-x-south":  // Vietnamese (Southern)
     case "sit/yue":  // Chinese (Cantonese)
     case "roa/ht":  // Haitian Creole
     case "zle/ru-LV":  // Russian (Latvia)
     case "tai/shn":  // Shan (Tai Yai)
+      return false;
+
+    // Allowed languages. All of these are supported by Chrome OS UI
+    // but not provided by default by Google's TTS.
+    case "sem/ar":  // Arabic
+    case "zls/bg":  // Bulgarian
+    case "inc/bn":  // Bengali (written as Bangla in Chrome's UI)
+    case "roa/ca":  // Catalan
+    case "sit/cmn": // Chinese (Mandarin)
+    case "zls/hr":  // Croatian
+    case "zlw/cs":  // Czech
+    case "gmq/da":  // Danish
+    case "urj/et":  // Estonian
+    case "urj/fi":  // Finnish
+    case "grk/el":  // Greek
+    case "inc/gu":  // Gujarati
+    case "urj/hu":  // Hungarian
+    case "jpx/ja":  // Japanese
+    case "dra/kn":  // Kannada
+    case "bat/lv":  // Latvian
+    case "bat/lt":  // Lithuanian
+    case "poz/ms":  // Malay
+    case "dra/ml":  // Malayalam
+    case "inc/mr":  // Marathi
+    case "gmq/nb":  // Norwegian Bokmål
+    case "ira/fa":  // Persian
+    case "zlw/pl":  // Polish
+    case "roa/ro":  // Romanian
+    case "zle/ru":  // Russian
+    case "zls/sr":  // Serbian
+    case "zlw/sk":  // Slovak
+    case "zls/sl":  // Slovenian
+    case "bnt/sw":  // Swahili
+    case "dra/ta":  // Tamil
+    case "dra/te":  // Telugu
+    case "trk/tr":  // Turkish
+    case "aav/vi":  // Vietnamese (Northern)
       return true;
   }
 
@@ -132,7 +137,7 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
 function isEspeakLanguageEnabled(langInfo, callback) {
   var defaultValue = isEspeakLanguageEnabledByDefault(langInfo);
 
-  var key = langInfo.identifier;
+  var key = 'lang-enabled-' + langInfo.identifier;
   chrome.storage.local.get(key, (function(result) {
     callback(result[key] !== undefined ? result[key] : defaultValue);
   }).bind(this));

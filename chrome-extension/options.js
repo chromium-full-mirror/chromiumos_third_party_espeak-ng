@@ -60,7 +60,8 @@ EspeakTtsOptions.prototype.onChange = function(event) {
         return;
 
     var obj = {};
-    obj[target.id] = target.checked;
+    var key = 'lang-enabled-' + target.id;
+    obj[key] = target.checked;
     chrome.storage.local.set(obj);
     console.log('updating voices');
     this.engine_.updateVoices();
