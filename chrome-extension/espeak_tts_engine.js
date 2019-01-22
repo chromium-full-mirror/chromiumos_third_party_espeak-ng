@@ -102,6 +102,11 @@ class EspeakTtsEngine {
     this.langInfoArray_ = [];
 
     /**
+     * Function to call when langInfoArray_ is populated.
+     */
+    this.pendingGetLangInfoArrayCallback_ = null;
+
+    /**
      * The default voice to use when no metadata is provided at all.
      */
     this.defaultEspeakVoiceName_ = null;
@@ -146,8 +151,13 @@ class EspeakTtsEngine {
    * Return the array of all languages supported by eSpeak. Called by
    * the options page.
    */
-  getLangInfoArray() {
-    return this.langInfoArray_;
+  getLangInfoArray(callback) {
+    if (this.langInfoArray_.length > 0) {
+      callback(this.langInfoArray_);
+      return;
+    }
+
+    this.pendingGetLangInfoArrayCallback_ = callback;
   };
 
   /**
@@ -188,6 +198,10 @@ class EspeakTtsEngine {
           }
         }).bind(this));
       }).bind(this));
+      if (this.pendingGetLangInfoArrayCallback_) {
+	this.pendingGetLangInfoArrayCallback_(this.langInfoArray_);
+	this.pendingGetLangInfoArrayCallback_ = null;
+      }
     }).bind(this));
   };
 

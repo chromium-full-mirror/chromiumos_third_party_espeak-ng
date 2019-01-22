@@ -16,11 +16,13 @@ function $(id) {
  * @constructor
  */
 var EspeakTtsOptions = function() {
-    chrome.runtime.getBackgroundPage((function(background) {
+    chrome.runtime.getBackgroundPage((background) => {
         this.engine_ = background.engine;
-        this.langInfoArray_ = this.engine_.getLangInfoArray();
-        this.init();
-    }).bind(this));
+        this.engine_.getLangInfoArray((langInfoArray) => {
+          this.langInfoArray_ = langInfoArray;
+          this.init();
+        });
+    });
 };
 
 EspeakTtsOptions.prototype.init = function() {
