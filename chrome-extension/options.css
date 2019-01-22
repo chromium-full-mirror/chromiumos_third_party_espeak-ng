@@ -63,11 +63,19 @@ h2 {
     height: 60px;
     margin: 0;
     padding: 0;
-    width: 40px;
+    width: 59px;
 }
 
 .option input[type='checkbox']:checked {
     background-image: url(checked.png);
+}
+
+.option input[type='checkbox']:focus {
+    background-image: url(unchecked-focused.png);
+}
+
+.option input[type='checkbox']:checked:focus {
+    background-image: url(checked-focused.png);
 }
 
 .option select {
