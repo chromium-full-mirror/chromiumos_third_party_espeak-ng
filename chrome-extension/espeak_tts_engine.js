@@ -130,17 +130,22 @@ class EspeakTtsEngine {
      */
     this.timeoutIds_ = [];
 
+    /**
+     * Callback to run after initialization.
+     */
+    this.pendingCallback_ = null;
+
+    /**
+     * True if initialization is done.
+     */
+    this.initialized_ = false;
+
     // Initialize the WASM module and call updateVoices when it's ready.
     this.tts_ = new eSpeakNG('js/espeakng.worker.js', (function() {
+      // This will call this.finishInitialization_() when done,
+      // which will initialize the audio worklet.
       this.updateVoices();
     }).bind(this));
-
-    // Initialize the audio worklet and hook up the gain node.
-    this.context_.audioWorklet.addModule('streaming_worklet_processor.js').then((function() {
-      this.streamingNode_ = new AudioWorkletNode(this.context_, 'streaming-worklet-processor');
-      this.streamingNode_.port.onmessage = this.onWorkletProcessorMessage.bind(this);
-    }).bind(this));
-    this.gainNode_.connect(this.context_.destination);
 
     // Start listening to chrome.ttsEngine requests.
     chrome.ttsEngine.onSpeak.addListener(this.onSpeak.bind(this));
@@ -224,12 +229,36 @@ class EspeakTtsEngine {
 
     this.defaultEspeakVoiceName_ = this.getBestEspeakVoice(
         '', navigator.language);
+
+    this.finishInitialization_();
+  };
+
+  /**
+   * Finish initialization by initializing the audio worklet.
+   * This is the final step, then we can start speaking.
+   */
+  finishInitialization_() {
+    // Initialize the audio worklet and hook up the gain node.
+    this.context_.audioWorklet.addModule('streaming_worklet_processor.js').then((function() {
+      this.streamingNode_ = new AudioWorkletNode(this.context_, 'streaming-worklet-processor');
+      this.streamingNode_.port.onmessage = this.onWorkletProcessorMessage.bind(this);
+      this.gainNode_.connect(this.context_.destination);
+
+      // Initialization is now complete.
+      this.initialized_ = true;
+      if (this.pendingCallback_) {
+	this.pendingCallback_();
+	this.pendingCallback_ = null;
+      }
+    }).bind(this));
   };
 
   /**
    * Called by the client to stop speech.
    */
   onStop() {
+    this.pendingCallback_ = null;
+
     this.playing_ = false;
     this.streamingNode_.disconnect();
     this.streamingNode_.port.postMessage({
@@ -253,6 +282,15 @@ class EspeakTtsEngine {
    */
   onSpeak(utterance, options, callback) {
     console.log('Will speak: "' + utterance + '" lang="' + options.lang + '"');
+
+    this.pendingCallback_ = null;
+
+    if (!this.initialized_) {
+      // We got a call to speak before we're initialized. Enqueue this until
+      // we're ready.
+      this.pendingCallback_ = this.onSpeak.bind(this, utterance, options, callback);
+      return;
+    }
 
     this.onStop();
 
