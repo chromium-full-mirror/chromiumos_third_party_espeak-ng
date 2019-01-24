@@ -42,12 +42,8 @@ class StreamingWorkletProcessor extends AudioWorkletProcessor {
     if (this.first_) {
       this.first_ = false;
     }
-    for (let channel = 0; channel < output.length; ++channel) {
-      if (output[channel].length != buffer.length) {
-        console.error('Buffer is ' + buffer.length + ' and output channel is =' + output[channel].lengh);
-      }
+    for (let channel = 0; channel < output.length; ++channel)
       output[channel].set(buffer);
-    }
 
     return true;
   }

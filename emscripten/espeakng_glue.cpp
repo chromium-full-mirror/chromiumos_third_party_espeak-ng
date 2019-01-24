@@ -19,23 +19,91 @@
 #include <stdlib.h>
 #include <emscripten.h>
 #include "speak_lib.h"
+#include "libresample.h"
 
-static int gSamplerate = 0;
+typedef int (JavaScriptCallbackType)(
+    float* wav, int inSampleCount, espeak_EVENT *events);
+
+static double gEspeakSampleRate = 0;
+static double gSystemSampleRate = 0;
+static double gFactor = 0;
+static JavaScriptCallbackType* gJavaScriptCallback = 0;
+static void* gResampleHandle = 0;
+
+// From espeak-ng.h
+extern "C"
+{
+extern int espeak_ng_GetSampleRate(void);
+}
+
+static int resampleCallback(short* wav,
+                            int inSampleCount,
+                            espeak_EVENT *events) {
+  const int bufferSize = 32768;
+  static float inBuffer[bufferSize];
+  static float outBuffer[bufferSize];
+
+  if (inSampleCount > bufferSize) {
+    fprintf(stderr, "Error: got more samples than buffer size\n");
+    return 0;
+  }
+
+  for (int i = 0; i < inSampleCount; i++) {
+    inBuffer[i] = wav[i] / 32768.0;
+  }
+
+  int lastFlag = 0;
+
+  espeak_EVENT* event = events;
+  while (event->type != espeakEVENT_LIST_TERMINATED) {
+    if (event->type == espeakEVENT_END)
+      lastFlag = 1;
+    event++;
+  }
+
+  int inBufferUsed = 0;
+  int outSampleCount = resample_process(gResampleHandle,
+                                        gFactor,
+                                        inBuffer,
+                                        inSampleCount,
+                                        lastFlag,
+                                        &inBufferUsed,
+                                        outBuffer,
+                                        bufferSize);
+
+  gJavaScriptCallback(outBuffer, outSampleCount, events);
+  return 0;
+}
 
 class eSpeakNGWorker {
 public:
   eSpeakNGWorker() : rate(espeakRATE_NORMAL), pitch(50), current_voice(NULL) {
-    if (!gSamplerate) {
-      gSamplerate = espeak_Initialize(
-        AUDIO_OUTPUT_SYNCHRONOUS, 100, NULL, espeakINITIALIZE_DONT_EXIT);
+    if (!gEspeakSampleRate) {
+      gEspeakSampleRate = espeak_Initialize(
+          AUDIO_OUTPUT_SYNCHRONOUS, 100, NULL, espeakINITIALIZE_DONT_EXIT);
     }
-    samplerate = gSamplerate;
+    samplerate = gEspeakSampleRate;
     voices = espeak_ListVoices(NULL);
   }
 
   void synth_(const char* aText, void* aCallback) {
-    t_espeak_callback* cb = reinterpret_cast<t_espeak_callback*>(aCallback);
-    espeak_SetSynthCallback(cb);
+    if (gEspeakSampleRate < 8000 || gEspeakSampleRate > 96000) {
+      fprintf(stderr, "Bad espeak sample rate: %.1f\n", gEspeakSampleRate);
+      exit(0);
+    }
+    if (gSystemSampleRate < 8000 || gSystemSampleRate > 96000) {
+      fprintf(stderr, "Bad system sample rate: %.1f\n", gSystemSampleRate);
+      exit(0);
+    }
+
+    gFactor = gSystemSampleRate / gEspeakSampleRate;
+
+    gJavaScriptCallback = reinterpret_cast<JavaScriptCallbackType*>(aCallback);
+    gResampleHandle = resample_open(/* highQuality = */ 1,
+                                    gFactor,
+                                    gFactor);
+    espeak_SetSynthCallback(
+        reinterpret_cast<t_espeak_callback*>(resampleCallback));
     espeak_SetParameter(espeakPITCH, pitch, 0);
     espeak_SetParameter(espeakRATE, rate, 0);
 
@@ -48,6 +116,8 @@ public:
 
     // Reset callback so other instances will work too.
     espeak_SetSynthCallback(NULL);
+
+    resample_close(gResampleHandle);
   }
 
   int synth_ipa_(const char* aText, const char* virtualFileName) {
@@ -57,35 +127,39 @@ public:
     bit 7:   use (bits 8-23) as a tie within multi-letter phonemes names
     bits 8-23:  separator character, between phoneme names
   */
-    
+
     espeak_SetSynthCallback(NULL);
-        
+
     int phoneme_options               = (1 << 1); // Use IPA
     int use_custom_phoneme_separator  = (0 << 7);
     int phonemes_separator            = ' '; // Use a default value
 
     int phoneme_conf                  = phoneme_options | (phonemes_separator << 8);
-    
+
     FILE* f_phonemes_out = fopen(virtualFileName,"wb");
     if(!f_phonemes_out)
       return -1;
-    
+
     //espeak_ng_InitializeOutput(ENOUTPUT_MODE_SYNCHRONOUS, 0, NULL);
     espeak_SetPhonemeTrace(phoneme_conf, f_phonemes_out);
     espeak_Synth(aText, 0, 0, POS_CHARACTER, 0, 0, NULL, NULL);
     espeak_SetPhonemeTrace(0, NULL);
     fclose(f_phonemes_out);
-    
+
+    return 0;
+  }
+
+  long set_systemSampleRate(int rate) {
+    gSystemSampleRate = rate;
     return 0;
   }
 
   long set_voice(
-        const char* aName,
-        const char* aLang=NULL,
-        unsigned char aGender=0,
-        unsigned char aAge=0,
-        unsigned char aVariant = 0
-    ) {
+      const char* aName,
+      const char* aLang=NULL,
+      unsigned char aGender=0,
+      unsigned char aAge=0,
+      unsigned char aVariant = 0) {
     long result = 0;
     if (aLang || aGender || aAge || aVariant) {
       espeak_VOICE props = { 0 };
@@ -120,4 +194,3 @@ private:
 };
 
 #include <glue.cpp>
-

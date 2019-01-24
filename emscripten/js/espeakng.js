@@ -63,6 +63,7 @@ for (var method of [
     'set_rate',
     'set_pitch',
     'set_voice',
+    'set_systemSampleRate',
     'synthesize',
     'synthesize_ipa'
     ]) {

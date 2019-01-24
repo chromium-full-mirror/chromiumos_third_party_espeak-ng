@@ -55,6 +55,7 @@ interface eSpeakNGWorker {
   long synth_ipa_(DOMString aText, DOMString virtualFileName);
   long getSizeOfEventStruct_();
   long set_voice(DOMString aName, DOMString aLang, optional octet gender=0, optional octet age=0, optional octet aVariant=0);
+  long set_systemSampleRate(long rate);
   [Const] attribute espeak_VOICE[] voices;
   readonly attribute long samplerate;
   attribute long rate;

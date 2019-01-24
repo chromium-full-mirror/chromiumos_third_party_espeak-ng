@@ -68,10 +68,9 @@ var eventTypes = [
 eSpeakNGWorker.prototype.synthesize = function (aText, aCallback) {
   var eventStructSize = this.getSizeOfEventStruct_();
   function cb(ptr, length, events_pointer) {
-    var data = new Float32Array(length*2);
+    var data = new Float32Array(length);
     for (var i = 0; i < length; i++) {
-      data[i*2] = Math.max(-1, Math.min(1, getValue(ptr + i*2, 'i16') / 32768));
-      data[i*2+1] = data[i*2];
+      data[i] = getValue(ptr + i*4, 'float');
     }
     var events = [];
     var ptr = events_pointer;
@@ -94,24 +93,24 @@ eSpeakNGWorker.prototype.synthesize = function (aText, aCallback) {
 };
 
 eSpeakNGWorker.prototype.synthesize_ipa = function (aText, aCallback) {
-  
+
   // Use a unique temp file for the worker. Avoid collisions, just in case.
   var ipaVirtualFileName = "espeak-ng-ipa-tmp-"  + Math.random().toString().substring(2);
-  
+
   var res = "";
   var code = this.synth_ipa_(aText, ipaVirtualFileName);
 
   if(code == 0)
     res = FS.readFile(ipaVirtualFileName, { encoding: 'utf8' })
-    
+
   // Clean up the tmp file
   FS.unlink(ipaVirtualFileName);
-    
+
   var ret = {
     code: code,
     ipa: res
   }
-  
+
   return ret;
 };
 
@@ -126,7 +125,7 @@ if (typeof WorkerGlobalScope !== 'undefined') {
   });
 
   onmessage = function(e) {
-    
+
     if (!worker) {
       throw 'eSpeakNGWorker worker not initialized';
     }

@@ -58,6 +58,14 @@ EM_GLUE_CPP=espeakng_glue.cpp
 EM_GLUE_AUTOGEN_CPP=glue.cpp
 EM_GLUE_AUTOGEN_JS=glue.js
 
+# libresample files
+EM_LIBRESAMPLE_FILTERKIT_CPP=third_party/libresample/src/filterkit.c
+EM_LIBRESAMPLE_RESAMPLE_CPP=third_party/libresample/src/resample.c
+EM_LIBRESAMPLE_RESAMPLESUBS_CPP=third_party/libresample/src/resamplesubs.c
+EM_LIBRESAMPLE_FILTERKIT_OBJ=third_party/libresample/src/filterkit.o
+EM_LIBRESAMPLE_RESAMPLE_OBJ=third_party/libresample/src/resample.o
+EM_LIBRESAMPLE_RESAMPLESUBS_OBJ=third_party/libresample/src/resamplesubs.o
+
 # NOTE: preload espeak-ng-data directory...
 EM_DATA_DIR=../espeak-ng-data
 # NOTE: ... but exclude these subdirectories/files
@@ -82,7 +90,7 @@ EM_ALL_POST_JS=$(EM_GLUE_AUTOGEN_JS) $(EM_POST_JS)
 # ./emconfigure ./configure --prefix=/usr --without-async
 # ./emmake make
 CXXFLAGS+=-DESPEAK_DATA_PATH=\"$(EM_VIRTUAL_PATH_ESPEAKNG_DATA)\"
-CXXFLAGS+=-I ./ -I ../ -I ../src/include/espeak-ng
+CXXFLAGS+=-I ./ -I ../ -I ../src/include/espeak-ng -I third_party/libresample/src -I third_party/libresample/include
 
 # NOTE: so far, pthread is not supported in any browser
 #       except Firefox Nightly.
@@ -94,9 +102,8 @@ CXXFLAGS+=-I ./ -I ../ -I ../src/include/espeak-ng
 #CXXFLAGS+=-s USE_PTHREADS=1
 
 # NOTE: extra flags for emscripten
-EM_CXXFLAGS=-s RESERVED_FUNCTION_POINTERS=2 --memory-init-file 0 -s FORCE_FILESYSTEM=1 -s WASM=1
-
-
+CXXFLAGS+=-s RESERVED_FUNCTION_POINTERS=2 --memory-init-file 0 -s FORCE_FILESYSTEM=1 -s WASM=1
+CFLAGS+=-s RESERVED_FUNCTION_POINTERS=2 --memory-init-file 0 -s FORCE_FILESYSTEM=1 -s WASM=1
 
 ###############################################################################
 # NOTE: actual targets
@@ -119,7 +126,11 @@ $(EM_GLUE_AUTOGEN_JS): $(EM_GLUE_AUTOGEN_CPP)
 
 $(EM_GLUE_OBJ): $(EM_GLUE_CPP)
 
-$(EM_WORKER_JS): $(EM_GLUE_AUTOGEN_CPP) $(EM_GLUE_OBJ) $(EM_ALL_PRE_JS) $(EM_ALL_POST_JS)
+$(EM_LIBRESAMPLE_FILTERKIT_OBJ): $(EM_LIBRESAMPLE_FILTERKIT_CPP)
+$(EM_LIBRESAMPLE_RESAMPLE_OBJ): $(EM_LIBRESAMPLE_RESAMPLE_CPP)
+$(EM_LIBRESAMPLE_RESAMPLESUBS_OBJ): $(EM_LIBRESAMPLE_RESAMPLESUBS_CPP)
+
+$(EM_WORKER_JS): $(EM_GLUE_AUTOGEN_CPP) $(EM_GLUE_OBJ) $(EM_LIBRESAMPLE_FILTERKIT_OBJ) $(EM_LIBRESAMPLE_RESAMPLE_OBJ) $(EM_LIBRESAMPLE_RESAMPLESUBS_OBJ) $(EM_ALL_PRE_JS) $(EM_ALL_POST_JS)
 ifeq ($(EM_LIBESPEAKNG),)
 	$(error Unable to find ../src/.libs/libespeak-ng .so or .dylib. Aborting!)
 endif
@@ -127,16 +138,18 @@ endif
 		$(EM_CXXFLAGS) \
 		$(EM_GLUE_OBJ) \
 		$(EM_LIBESPEAKNG) \
+		$(EM_LIBRESAMPLE_FILTERKIT_OBJ) \
+		$(EM_LIBRESAMPLE_RESAMPLESUBS_OBJ) \
+		$(EM_LIBRESAMPLE_RESAMPLE_OBJ) \
 		$(patsubst %,--pre-js %,$(EM_ALL_PRE_JS)) \
 		$(patsubst %,--post-js %,$(EM_ALL_POST_JS)) \
 		-o $@
 
 clean-intermediate:
-	rm -f *.o *.out *.pkl $(EM_GLUE_AUTOGEN_CPP) $(EM_GLUE_AUTOGEN_JS) $(EM_ESPEAKNG_DATA_PACKAGE_JS)
+	rm -f *.o third_party/libresample/src/*.o *.out *.pkl $(EM_GLUE_AUTOGEN_CPP) $(EM_GLUE_AUTOGEN_JS) $(EM_ESPEAKNG_DATA_PACKAGE_JS)
 
 clean: clean-intermediate
 	rm -f $(EM_WORKER_DATA) $(EM_WORKER_JS) $(EM_PTHREAD_MAIN_JS)
 
 help:
 	echo "Available targets: all clean clean-intermediate help"
-

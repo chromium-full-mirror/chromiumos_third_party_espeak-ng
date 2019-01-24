@@ -301,6 +301,8 @@ class EspeakTtsEngine {
         options.voiceName, options.lang);
     this.tts_.set_voice(espeakVoiceName);
 
+    this.tts_.set_systemSampleRate(this.context_.sampleRate);
+
     // Chrome TTS rates range from 0.1 to 10.0, with 1.0 as the default.
     // eSpeak rates range from 80 to 450, with 175 as the default.
     var rate = Math.min(Math.max(Math.floor(options.rate * 175), 80), 450);
@@ -321,9 +323,6 @@ class EspeakTtsEngine {
         if (events) {
           events.forEach((function(event) {
             switch (event.type) {
-            case 'samplerate':
-              // Incomplete?
-              break;
             case 'sentence':
             case 'word':
               this.scheduleTimepointEvent(
@@ -388,6 +387,7 @@ class EspeakTtsEngine {
 
     var i = 0;
     var len = samples.length;
+
     var didSendBuffers = false;
     while (i < len) {
       var chunkLen = Math.min(this.bufferLen_ - this.currentBufferIndex_,
@@ -395,7 +395,8 @@ class EspeakTtsEngine {
       if (!this.currentBuffer_) {
         this.currentBuffer_ = new Float32Array(this.bufferLen_);
       }
-      this.currentBuffer_.set(samples.subarray(i, i + chunkLen), this.currentBufferIndex_);
+      this.currentBuffer_.set(samples.subarray(i, i + chunkLen),
+                              this.currentBufferIndex_);
       i += chunkLen;
       this.currentBufferIndex_ += chunkLen;
       if (this.currentBufferIndex_ == this.bufferLen_) {
