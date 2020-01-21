@@ -173,6 +173,13 @@ class EspeakTtsEngine {
     console.log('updateVoices');
     this.tts_.list_voices((function (langInfoArray) {
       this.langInfoArray_ = langInfoArray;
+      // Remove Japanese because the voice cannot pronounce many characters.
+      for (var i = 0; i < this.langInfoArray_.length; ++i) {
+        if (this.langInfoArray_[i].identifier === 'jpx/ja') {
+          this.langInfoArray_.splice(i,1);
+          break;
+        }
+      }
       this.ttsEngineApiVoices_ = [];
       this.internalVoiceInfos_ = [];
       this.langsRemaining_ = this.langInfoArray_.length;

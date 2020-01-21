@@ -34,6 +34,7 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "gmw/en-GB-x-gbcwmd":  // English (West Midlands)
     case "gmw/en-GB-x-rp":  // English (Received Pronunciation)
     case "gmw/en-US":  // English (America)
+    case "jpx/ja":  // Japanese. Disable by default due to voice quality.
       return false;
 
     // These languages are not supported by Chrome OS UI,
@@ -106,7 +107,6 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "grk/el":  // Greek
     case "inc/gu":  // Gujarati
     case "urj/hu":  // Hungarian
-    case "jpx/ja":  // Japanese
     case "dra/kn":  // Kannada
     case "bat/lv":  // Latvian
     case "bat/lt":  // Lithuanian
