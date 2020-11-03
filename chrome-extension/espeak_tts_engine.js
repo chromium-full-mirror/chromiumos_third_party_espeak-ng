@@ -37,6 +37,10 @@ class EspeakTtsEngine {
      */
     this.utterance_ = null;
 
+    /**
+     * An id to track the current utterance to, for example, ensure audio data
+     * for previous utterances is ignored.
+     */
     this.utteranceId_ = 0;
 
     /**
@@ -137,10 +141,6 @@ class EspeakTtsEngine {
     // Start listening to chrome.ttsEngine requests.
     chrome.ttsEngine.onSpeak.addListener(this.onSpeak.bind(this));
     chrome.ttsEngine.onStop.addListener(this.onStop.bind(this));
-
-    chrome.mojoPrivate.requireAsync('chromeos.tts.stream').then(stream => {
-      this.ttsStream_ = stream;
-    });
   }
 
   /**
@@ -239,13 +239,19 @@ class EspeakTtsEngine {
    * This is the final step, then we can start speaking.
    */
   finishInitialization_() {
-    // Initialization is now complete.
-    this.initialized_ = true;
-    if (this.pendingCallback_) {
-      this.pendingCallback_();
-      this.pendingCallback_ = null;
-    }
-  };
+    chrome.mojoPrivate.requireAsync('chromeos.tts.stream_factory')
+        .then(factory => {
+          factory.getPlaybackTtsStream().then(result => {
+            this.ttsStream_ = result.stream;
+            // Initialization is now complete.
+            this.initialized_ = true;
+            if (this.pendingCallback_) {
+              this.pendingCallback_();
+              this.pendingCallback_ = null;
+            }
+          });
+        });
+  }
 
   /**
    * Called by the client to stop speech.
@@ -378,11 +384,9 @@ class EspeakTtsEngine {
               }).bind(this));
         }).bind(this));
 
-    if (exactMatchEspeakVoiceName)
-      return exactMatchEspeakVoiceName;
+    if (exactMatchEspeakVoiceName) return exactMatchEspeakVoiceName;
 
-    if (langMatchEspeakVoiceName)
-      return langMatchEspeakVoiceName;
+    if (langMatchEspeakVoiceName) return langMatchEspeakVoiceName;
 
     return this.defaultEspeakVoiceName_;
   };
@@ -415,7 +419,6 @@ class EspeakTtsEngine {
       i += chunkLen;
       this.currentBufferIndex_ += chunkLen;
       if (this.currentBufferIndex_ == this.bufferLen_) {
-        console.log('is end for real!' + (i >= len));
         this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
         didSendBuffers = true;
         charIndex = -1;
@@ -427,7 +430,6 @@ class EspeakTtsEngine {
 
     // Push final buffer, not complete.
     if (isEnd && this.currentBufferIndex_ > 0) {
-      console.log('incoomp!');
       this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
       didSendBuffers = true;
       this.currentBufferIndex_ = 0;
