@@ -37,6 +37,8 @@ class EspeakTtsEngine {
      */
     this.utterance_ = null;
 
+    this.utteranceId_ = 0;
+
     /**
      * The handle to the WASM Espeak-NG module.
      */
@@ -46,7 +48,7 @@ class EspeakTtsEngine {
      * The size, in samples, of each audio frame. When using an
      * AudioWorkletProcessor this is always 128 samples.
      */
-    this.bufferLen_ = 128;
+    this.bufferLen_ = 512;
 
     /**
      * The current buffer of audio samples from the engine. When each
@@ -59,18 +61,6 @@ class EspeakTtsEngine {
      * next audio sample should be written.
      */
     this.currentBufferIndex_ = 0;
-
-    /**
-     * The audio context, needed by any app using the Web Audio API.
-     */
-    this.context_ = new AudioContext();
-
-    /**
-     * A node that allows us to adjust the output volume. The
-     * AudioWorkletNode connects to the gain node, and the gain node
-     * connects to the audio context destination.
-     */
-    this.gainNode_ = this.context_.createGain();
 
     /**
      * Whether or not we're currently playing audio via the Web Audio
@@ -118,12 +108,6 @@ class EspeakTtsEngine {
     this.startTime_ = null;
 
     /**
-     * The queue of events that need to be scheduled to fire when
-     * audio playback of the utterance begins.
-     */
-    this.eventQueue_ = [];
-
-    /**
      * The timeout IDs (from calling window.setTimeout) of event
      * callbacks that have already been scheduled. These are cleared
      * when we get a call to stop speech.
@@ -142,14 +126,21 @@ class EspeakTtsEngine {
 
     // Initialize the WASM module and call updateVoices when it's ready.
     this.tts_ = new eSpeakNG('js/espeakng.worker.js', (function() {
-      // This will call this.finishInitialization_() when done,
-      // which will initialize the audio worklet.
-      this.updateVoices();
-    }).bind(this));
+                                                        // This will call
+                                                        // this.finishInitialization_()
+                                                        // when done, which will
+                                                        // initialize the audio
+                                                        // worklet.
+                                                        this.updateVoices();
+                                                      }).bind(this));
 
     // Start listening to chrome.ttsEngine requests.
     chrome.ttsEngine.onSpeak.addListener(this.onSpeak.bind(this));
     chrome.ttsEngine.onStop.addListener(this.onStop.bind(this));
+
+    chrome.mojoPrivate.requireAsync('chromeos.tts.stream').then(stream => {
+      this.ttsStream_ = stream;
+    });
   }
 
   /**
@@ -171,50 +162,54 @@ class EspeakTtsEngine {
    */
   updateVoices() {
     console.log('updateVoices');
-    this.tts_.list_voices((function (langInfoArray) {
-      this.langInfoArray_ = langInfoArray;
-      // Remove Japanese because the voice cannot pronounce many characters.
-      for (var i = 0; i < this.langInfoArray_.length; ++i) {
-        if (this.langInfoArray_[i].identifier === 'jpx/ja') {
-          this.langInfoArray_.splice(i,1);
-          break;
-        }
-      }
-      this.ttsEngineApiVoices_ = [];
-      this.internalVoiceInfos_ = [];
-      this.langsRemaining_ = this.langInfoArray_.length;
-      this.langInfoArray_.forEach((function(langInfo) {
-        isEspeakLanguageEnabled(langInfo, (function(enabled) {
-          if (enabled) {
-            var voiceName = 'eSpeak ' + langInfo.name;
-            var ttsEngineApiVoice = {
-              voiceName: voiceName,
-              lang: langInfo.languages[0].name,
-              remote: false,
-              eventTypes: [
-                'start', 'end', 'word', 'sentence', 'error'
-              ]};
-            this.ttsEngineApiVoices_.push(ttsEngineApiVoice);
-
-            var internalVoiceInfo = {
-              voiceName: voiceName,
-              espeakVoiceName: langInfo.name,
-              languages: langInfo.languages
-            };
-            this.internalVoiceInfos_.push(internalVoiceInfo);
+    this.tts_.list_voices(
+        (function(langInfoArray) {
+          this.langInfoArray_ = langInfoArray;
+          // Remove Japanese because the voice cannot pronounce many characters.
+          for (var i = 0; i < this.langInfoArray_.length; ++i) {
+            if (this.langInfoArray_[i].identifier === 'jpx/ja') {
+              this.langInfoArray_.splice(i, 1);
+              break;
+            }
           }
+          this.ttsEngineApiVoices_ = [];
+          this.internalVoiceInfos_ = [];
+          this.langsRemaining_ = this.langInfoArray_.length;
+          this.langInfoArray_.forEach(
+              (function(langInfo) {
+                isEspeakLanguageEnabled(
+                    langInfo,
+                    (function(enabled) {
+                      if (enabled) {
+                        var voiceName = 'eSpeak ' + langInfo.name;
+                        var ttsEngineApiVoice = {
+                          voiceName: voiceName,
+                          lang: langInfo.languages[0].name,
+                          remote: false,
+                          eventTypes:
+                              ['start', 'end', 'word', 'sentence', 'error']
+                        };
+                        this.ttsEngineApiVoices_.push(ttsEngineApiVoice);
 
-          this.langsRemaining_--;
-          if (this.langsRemaining_ == 0) {
-            this.finishUpdatingVoices_();
+                        var internalVoiceInfo = {
+                          voiceName: voiceName,
+                          espeakVoiceName: langInfo.name,
+                          languages: langInfo.languages
+                        };
+                        this.internalVoiceInfos_.push(internalVoiceInfo);
+                      }
+
+                      this.langsRemaining_--;
+                      if (this.langsRemaining_ == 0) {
+                        this.finishUpdatingVoices_();
+                      }
+                    }).bind(this));
+              }).bind(this));
+          if (this.pendingGetLangInfoArrayCallback_) {
+            this.pendingGetLangInfoArrayCallback_(this.langInfoArray_);
+            this.pendingGetLangInfoArrayCallback_ = null;
           }
         }).bind(this));
-      }).bind(this));
-      if (this.pendingGetLangInfoArrayCallback_) {
-	this.pendingGetLangInfoArrayCallback_(this.langInfoArray_);
-	this.pendingGetLangInfoArrayCallback_ = null;
-      }
-    }).bind(this));
   };
 
   /**
@@ -231,11 +226,10 @@ class EspeakTtsEngine {
   finishUpdatingVoices_() {
     console.log('finishUpdatingVoices_');
     chrome.ttsEngine.updateVoices(this.ttsEngineApiVoices_);
-    console.log('Loaded ' + this.ttsEngineApiVoices_.length +
-          ' voices');
+    console.log('Loaded ' + this.ttsEngineApiVoices_.length + ' voices');
 
-    this.defaultEspeakVoiceName_ = this.getBestEspeakVoice(
-        '', navigator.language);
+    this.defaultEspeakVoiceName_ =
+        this.getBestEspeakVoice('', navigator.language);
 
     this.finishInitialization_();
   };
@@ -245,34 +239,27 @@ class EspeakTtsEngine {
    * This is the final step, then we can start speaking.
    */
   finishInitialization_() {
-    // Initialize the audio worklet and hook up the gain node.
-    this.context_.audioWorklet.addModule('streaming_worklet_processor.js').then((function() {
-      this.streamingNode_ = new AudioWorkletNode(this.context_, 'streaming-worklet-processor');
-      this.streamingNode_.port.onmessage = this.onWorkletProcessorMessage.bind(this);
-      this.gainNode_.connect(this.context_.destination);
-
-      // Initialization is now complete.
-      this.initialized_ = true;
-      if (this.pendingCallback_) {
-	this.pendingCallback_();
-	this.pendingCallback_ = null;
-      }
-    }).bind(this));
+    // Initialization is now complete.
+    this.initialized_ = true;
+    if (this.pendingCallback_) {
+      this.pendingCallback_();
+      this.pendingCallback_ = null;
+    }
   };
 
   /**
    * Called by the client to stop speech.
    */
   onStop() {
+    this.ttsStream_.stop();
+    this.onStopInternal();
+  }
+
+  onStopInternal() {
     this.pendingCallback_ = null;
 
     this.playing_ = false;
-    this.streamingNode_.disconnect();
-    this.streamingNode_.port.postMessage({
-      'command': 'clearBuffers'
-    });
     this.ttsEngineApiCallback_ = null;
-    this.eventQueue_ = [];
     this.timeoutIds_.forEach(function(timeoutId) {
       window.clearTimeout(timeoutId);
     });
@@ -284,31 +271,31 @@ class EspeakTtsEngine {
    * @param {string} utterance The utterance to say.
    * @param {object} options The options affecting the speech, like language,
    *   pitch, rate, etc.
-   * @param {function(object)} callback The function to receive messages from the
+   * @param {function(object)} callback The function to receive messages from
+   *     the
    * engine.
    */
   onSpeak(utterance, options, callback) {
     console.log('Will speak: "' + utterance + '" lang="' + options.lang + '"');
-
+    this.utteranceId_++;
     this.pendingCallback_ = null;
 
     if (!this.initialized_) {
       // We got a call to speak before we're initialized. Enqueue this until
       // we're ready.
-      this.pendingCallback_ = this.onSpeak.bind(this, utterance, options, callback);
+      this.pendingCallback_ =
+          this.onSpeak.bind(this, utterance, options, callback);
       return;
     }
-
-    this.onStop();
 
     this.ttsEngineApiCallback_ = callback;
     this.utterance_ = utterance;
 
-    var espeakVoiceName = this.getBestEspeakVoice(
-        options.voiceName, options.lang);
+    var espeakVoiceName =
+        this.getBestEspeakVoice(options.voiceName, options.lang);
     this.tts_.set_voice(espeakVoiceName);
 
-    this.tts_.set_systemSampleRate(this.context_.sampleRate);
+    this.tts_.set_systemSampleRate(22050);
 
     // Chrome TTS rates range from 0.1 to 10.0, with 1.0 as the default.
     // eSpeak rates range from 80 to 450, with 175 as the default.
@@ -321,31 +308,50 @@ class EspeakTtsEngine {
     this.tts_.set_pitch(pitch);
 
     var volume = Math.min(Math.max(options.volume, 0.0), 1.0);
-    this.gainNode_.gain.value = volume;
+    //    this.gainNode_.gain.value = volume;
+    const owner = this;
+    this.ttsStream_.play().then(ttsEventObserver => {
+      new mojo.Binding(chromeos.tts.mojom.TtsEventObserver, new class {
+        onStart() {
+          owner.ttsEngineApiCallback_({'type': 'start', 'charIndex': 0});
+        }
+
+        onTimepoint(charIndex) {
+          owner.scheduleTimepointEvent(charIndex, 'word');
+        }
+        onEnd() {
+          owner.ttsEngineApiCallback_(
+              {'type': 'end', 'charIndex': owner.utterance_.length});
+          owner.onStopInternal();
+        }
+        onError() {}
+      }(), ttsEventObserver.eventObserver);
+    });
 
     this.tts_.synthesize(
-      utterance,
-      (function(samples, events) {
-        var isEnd = false;
-        if (events) {
-          events.forEach((function(event) {
-            switch (event.type) {
-            case 'sentence':
-            case 'word':
-              this.scheduleTimepointEvent(
-                event.audio_position,
-                event.text_position - 1,
-                event.type);
-              break;
-            case 'end':
-              isEnd = true;
-              break;
-            }
-          }).bind(this));
-        }
-        var sampleArray = new Float32Array(samples);
-        this.processSamples(sampleArray, isEnd);
-      }).bind(this));
+        utterance, (function(utteranceId, samples, events) {
+                     if (this.utteranceId_ != utteranceId) {
+                       return;
+                     }
+                     let isEnd = false;
+                     let charIndex = -1;
+                     if (events) {
+                       events.forEach((function(event) {
+                                        charIndex = event.text_position;
+                                        switch (event.type) {
+                                          case 'sentence':
+                                          case 'word':
+                                            break;
+                                          case 'end':
+                                            isEnd = this.utterance_.length ==
+                                                event.text_position;
+                                            break;
+                                        }
+                                      }).bind(this));
+                     }
+                     var sampleArray = new Float32Array(samples);
+                     this.processSamples(sampleArray, charIndex, isEnd);
+                   }).bind(this, this.utteranceId_));
   };
 
   /**
@@ -358,17 +364,19 @@ class EspeakTtsEngine {
     var exactMatchEspeakVoiceName = null;
     var langMatchEspeakVoiceName = null;
     var langMatch = '';
-    this.internalVoiceInfos_.forEach((function(voice) {
-      if (desiredVoiceName == voice.voiceName)
-        exactMatchEspeakVoiceName = voice.espeakVoiceName;
-      voice.languages.forEach((function(lang) {
-        if (desiredLang.toLowerCase() == lang.name.toLowerCase() &&
-          lang.name.length > langMatch.length) {
-          langMatch = lang.name;
-          langMatchEspeakVoiceName = voice.voiceName;
-        }
-      }).bind(this));
-    }).bind(this));
+    this.internalVoiceInfos_.forEach(
+        (function(voice) {
+          if (desiredVoiceName == voice.voiceName)
+            exactMatchEspeakVoiceName = voice.espeakVoiceName;
+          voice.languages.forEach(
+              (function(lang) {
+                if (desiredLang.toLowerCase() == lang.name.toLowerCase() &&
+                    lang.name.length > langMatch.length) {
+                  langMatch = lang.name;
+                  langMatchEspeakVoiceName = voice.voiceName;
+                }
+              }).bind(this));
+        }).bind(this));
 
     if (exactMatchEspeakVoiceName)
       return exactMatchEspeakVoiceName;
@@ -387,7 +395,7 @@ class EspeakTtsEngine {
    * If these are the first samples for a new utterance, starts speech
    * by connceting the audio node.
    */
-  processSamples(samples, isEnd) {
+  processSamples(samples, charIndex, isEnd) {
     if (!this.ttsEngineApiCallback_) {
       return;
     }
@@ -397,21 +405,20 @@ class EspeakTtsEngine {
 
     var didSendBuffers = false;
     while (i < len) {
-      var chunkLen = Math.min(this.bufferLen_ - this.currentBufferIndex_,
-                  len - i);
+      var chunkLen =
+          Math.min(this.bufferLen_ - this.currentBufferIndex_, len - i);
       if (!this.currentBuffer_) {
         this.currentBuffer_ = new Float32Array(this.bufferLen_);
       }
-      this.currentBuffer_.set(samples.subarray(i, i + chunkLen),
-                              this.currentBufferIndex_);
+      this.currentBuffer_.set(
+          samples.subarray(i, i + chunkLen), this.currentBufferIndex_);
       i += chunkLen;
       this.currentBufferIndex_ += chunkLen;
       if (this.currentBufferIndex_ == this.bufferLen_) {
-        this.streamingNode_.port.postMessage({
-          'command': 'addBuffer',
-          'buffer': this.currentBuffer_
-        });
+        console.log('is end for real!' + (i >= len));
+        this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
         didSendBuffers = true;
+        charIndex = -1;
 
         this.currentBufferIndex_ = 0;
         this.currentBuffer_ = null;
@@ -420,10 +427,8 @@ class EspeakTtsEngine {
 
     // Push final buffer, not complete.
     if (isEnd && this.currentBufferIndex_ > 0) {
-      this.streamingNode_.port.postMessage({
-        'command': 'addBuffer',
-        'buffer': this.currentBuffer_
-      });
+      console.log('incoomp!');
+      this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
       didSendBuffers = true;
       this.currentBufferIndex_ = 0;
       this.currentBuffer_ = null;
@@ -432,35 +437,8 @@ class EspeakTtsEngine {
     // Connect and start playback if this is the
     // first buffer.
     if (didSendBuffers && !this.playing_) {
-      this.streamingNode_.connect(this.gainNode_);
       this.playing_ = true;
-      this.ttsEngineApiCallback_({
-        'type': 'start',
-        'charIndex': 0
-      });
       this.startTime_ = new Date();
-      this.scheduleQueuedTimepointEvents();
-    }
-  };
-
-  /**
-   * Called when we get a message from the worklet processor in
-   * the audio thread. Currently the only message is that it has
-   * run out of audio buffers. When that happens we fire the 'end'
-   * event and stop speaking.
-   */
-  onWorkletProcessorMessage(event) {
-    if (!this.ttsEngineApiCallback_) {
-      // Do nothing if we've already stopped.
-      return;
-    }
-
-    if (event.data.type == 'empty') {
-      this.ttsEngineApiCallback_({
-        'type': 'end',
-        'charIndex': this.utterance_.length
-      });
-      this.onStop();
     }
   };
 
@@ -470,60 +448,23 @@ class EspeakTtsEngine {
    * desired time and actual elapsed time so far. If audio playback has not
    * started yet, put it in a queue.
    */
-  scheduleTimepointEvent(audioPositionMillis,
-                         textPosition,
-                         eventType) {
-
-    if (textPosition < 0 || audioPositionMillis <= 0) {
+  scheduleTimepointEvent(textPosition, eventType) {
+    if (textPosition < 0) {
       return;
     }
-
-    if (!this.playing_) {
-      this.eventQueue_.push({'audioPositionMillis': audioPositionMillis,
-                   'textPosition': textPosition,
-                   'eventType': eventType});
-      return;
-    }
-
-    var currentTimeMillis = (new Date()) - this.startTime_;
-    var deltaTimeMillis = audioPositionMillis - currentTimeMillis;
-    if (deltaTimeMillis < -100) {
-      console.log('Skipping event ' + eventType + ' in the past');
-      // Skip it if it's too much in the past.
-      return;
-    } else if (deltaTimeMillis < 2) {
-      // It's basically now, fire it.
-      this.ttsEngineApiCallback_({
-        'type': eventType,
-        'charIndex': textPosition
-      });
-      return;
-    }
-
-    var timeoutId = window.setTimeout((function() {
-      this.ttsEngineApiCallback_({
-        'type': eventType,
-        'charIndex': textPosition
-      });
-    }).bind(this), deltaTimeMillis);
-    this.timeoutIds_.push(timeoutId);
-  }
-
-  /**
-   * If any audio events where queued up because they were generated
-   * before audio playback had started, schedule them now.
-   */
-  scheduleQueuedTimepointEvents() {
-    console.assert(this.playing_);
-    var events = this.eventQueue_;
-    this.eventQueue_ = [];
-    events.forEach((function(event) {
-      this.scheduleTimepointEvent(
-        event.audioPositionMillis,
-        event.textPosition,
-        event.eventType);
-    }).bind(this));
+    this.ttsEngineApiCallback_({'type': eventType, 'charIndex': textPosition});
   }
 }
 
-window.engine = new EspeakTtsEngine();
+// In 'split' manifest mode, the extension system runs two copies of the
+// extension. One in an incognito context; the other not. In guest mode, the
+// extension system runs only the extension in an incognito context. To prevent
+// doubling of this extension, only continue for one context.
+const manifest =
+    /** @type {{incognito: (string|undefined)}} */ (
+        chrome.runtime.getManifest());
+if (manifest.incognito == 'split' && !chrome.extension.inIncognitoContext) {
+  window.close();
+} else {
+  window.engine = new EspeakTtsEngine();
+}
