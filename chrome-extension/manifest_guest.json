@@ -9,8 +9,8 @@
       "language_defaults.js",
       "js/espeakng.js",
       "espeak_tts_engine.js"
-    ]
-
+    ],
+    "persistent": false
   },
   "permissions": [
     "mojoPrivate",
