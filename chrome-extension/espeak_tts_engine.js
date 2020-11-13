@@ -274,6 +274,11 @@ class EspeakTtsEngine {
    * engine.
    */
   onSpeak(utterance, options, callback) {
+    if (!this.ttsStream_.ptr.isBound()) {
+      window.close();
+      return;
+    }
+
     console.log('Will speak: "' + utterance + '" lang="' + options.lang + '"');
     this.utteranceId_++;
     this.pendingCallback_ = null;
@@ -326,30 +331,35 @@ class EspeakTtsEngine {
       }(), ttsEventObserver.eventObserver);
     });
 
-    this.tts_.synthesize(
-        utterance, (function(utteranceId, samples, events) {
-                     if (this.utteranceId_ != utteranceId) {
-                       return;
-                     }
-                     let isEnd = false;
-                     let charIndex = -1;
-                     if (events) {
-                       events.forEach((function(event) {
-                                        charIndex = event.text_position;
-                                        switch (event.type) {
-                                          case 'sentence':
-                                          case 'word':
-                                            break;
-                                          case 'end':
-                                            isEnd = this.utterance_.length ==
-                                                event.text_position;
-                                            break;
-                                        }
-                                      }).bind(this));
-                     }
-                     var sampleArray = new Float32Array(samples);
-                     this.processSamples(sampleArray, charIndex, isEnd);
-                   }).bind(this, this.utteranceId_));
+    var handleEvents =
+        function(utteranceId, samples, events) {
+      if (this.utteranceId_ != utteranceId) {
+        return;
+      }
+
+      // 'end' type events can still be followed by audio data. This is a more
+      // reliable way the native code signals end.
+      let isEnd = events === undefined;
+      let charIndex = -1;
+
+      if (events) {
+        for (const event of events) {
+          charIndex = event.text_position;
+
+          switch (event.type) {
+            case 'sentence':
+            case 'word':
+            case 'end':
+              break;
+          }
+        }
+      }
+      var sampleArray = new Float32Array(samples);
+      this.processSamples(sampleArray, charIndex, isEnd);
+    }
+
+        this.tts_.synthesize(
+            utterance, (handleEvents).bind(this, this.utteranceId_));
   };
 
   /**
@@ -440,6 +450,10 @@ class EspeakTtsEngine {
    * Schedules an event to be fired indicating progress of speech synthesis.
    */
   scheduleTimepointEvent(textPosition, eventType) {
+    if (!this.ttsEngineApiCallback_) {
+      return;
+    }
+
     if (textPosition < 0) {
       return;
     }
