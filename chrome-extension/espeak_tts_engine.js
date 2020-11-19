@@ -274,7 +274,7 @@ class EspeakTtsEngine {
    * engine.
    */
   onSpeak(utterance, options, callback) {
-    if (!this.ttsStream_.ptr.isBound()) {
+    if (this.ttsStream_ && !this.ttsStream_.ptr.isBound()) {
       window.close();
       return;
     }
