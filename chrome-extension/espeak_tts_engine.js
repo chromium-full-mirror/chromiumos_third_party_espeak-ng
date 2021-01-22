@@ -194,7 +194,7 @@ class EspeakTtsEngine {
 
                       this.langsRemaining_--;
                       if (this.langsRemaining_ == 0) {
-                        this.finishUpdatingVoices_();
+                        this.finishInitialization_();
                       }
                     }).bind(this));
               }).bind(this));
@@ -223,8 +223,6 @@ class EspeakTtsEngine {
 
     this.defaultEspeakVoiceName_ =
         this.getBestEspeakVoice('', navigator.language);
-
-    this.finishInitialization_();
   };
 
   /**
@@ -238,6 +236,9 @@ class EspeakTtsEngine {
             this.ttsStream_ = result.stream;
             this.sampleRate_ = result.sampleRate;
             this.bufferLen_ = result.bufferSize;
+
+            this.finishUpdatingVoices_();
+
             // Initialization is now complete.
             this.initialized_ = true;
             if (this.pendingCallback_) {
