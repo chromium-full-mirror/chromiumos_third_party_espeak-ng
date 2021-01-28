@@ -45,6 +45,10 @@ EspeakTtsOptions.prototype.init = function() {
   this.update();
 
   document.addEventListener('change', this.onChange.bind(this), false);
+
+  // Schedule this for after the updates above are done. This is guaranteed to
+  // run after them.
+  setTimeout(this.ensureLastVoiceUnremovable.bind(this), 0);
 };
 
 EspeakTtsOptions.prototype.update = function() {
@@ -67,6 +71,18 @@ EspeakTtsOptions.prototype.onChange = function(event) {
   chrome.storage.local.set(obj);
   console.log('updating voices');
   this.engine_.updateVoices();
+
+  this.ensureLastVoiceUnremovable();
+};
+
+EspeakTtsOptions.prototype.ensureLastVoiceUnremovable = function() {
+  // If there's only one voice left, disable it from being unchecked. Otherwise,
+  // enable them all.
+  const checkedNodes = document.querySelectorAll('.checkbox:checked');
+  const shouldDisable = checkedNodes.length == 1;
+  for (let i = 0; i < checkedNodes.length; i++) {
+    checkedNodes[i].disabled = shouldDisable;
+  }
 };
 
 function addTranslatedMessagesToDom() {
