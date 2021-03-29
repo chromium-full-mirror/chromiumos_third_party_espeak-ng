@@ -13,7 +13,6 @@
     "persistent": false
   },
   "permissions": [
-    "mojoPrivate",
     "storage",
     "ttsEngine"
   ],

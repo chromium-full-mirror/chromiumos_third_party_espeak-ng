@@ -53,7 +53,7 @@ class EspeakTtsEngine {
      * The size, in samples, of each audio frame. When using an
      * AudioWorkletProcessor this is always 128 samples.
      */
-    this.bufferLen_;
+    this.bufferSize_;
 
     /**
      * The current buffer of audio samples from the engine. When each
@@ -132,8 +132,11 @@ class EspeakTtsEngine {
                                                       }).bind(this));
 
     // Start listening to chrome.ttsEngine requests.
-    chrome.ttsEngine.onSpeak.addListener(this.onSpeak.bind(this));
+    chrome.ttsEngine.onSpeakWithAudioStream.addListener(
+        this.onSpeak.bind(this));
     chrome.ttsEngine.onStop.addListener(this.onStop.bind(this));
+    chrome.ttsEngine.onPause.addListener(() => {});
+    chrome.ttsEngine.onResume.addListener(() => {});
   }
 
   /**
@@ -230,30 +233,20 @@ class EspeakTtsEngine {
    * This is the final step, then we can start speaking.
    */
   finishInitialization_() {
-    chrome.mojoPrivate.requireAsync('chromeos.tts.stream_factory')
-        .then(factory => {
-          factory.createPlaybackTtsStream().then(result => {
-            this.ttsStream_ = result.stream;
-            this.sampleRate_ = result.sampleRate;
-            this.bufferLen_ = result.bufferSize;
+    this.finishUpdatingVoices_();
 
-            this.finishUpdatingVoices_();
-
-            // Initialization is now complete.
-            this.initialized_ = true;
-            if (this.pendingCallback_) {
-              this.pendingCallback_();
-              this.pendingCallback_ = null;
-            }
-          });
-        });
+    // Initialization is now complete.
+    this.initialized_ = true;
+    if (this.pendingCallback_) {
+      this.pendingCallback_();
+      this.pendingCallback_ = null;
+    }
   }
 
   /**
    * Called by the client to stop speech.
    */
   onStop() {
-    this.ttsStream_.stop();
     this.onStopInternal();
   }
 
@@ -274,12 +267,7 @@ class EspeakTtsEngine {
    *     the
    * engine.
    */
-  onSpeak(utterance, options, callback) {
-    if (this.ttsStream_ && !this.ttsStream_.ptr.isBound()) {
-      window.close();
-      return;
-    }
-
+  onSpeak(utterance, options, audioStreamOptions, callback) {
     console.log('Will speak: "' + utterance + '" lang="' + options.lang + '"');
     this.utteranceId_++;
     this.pendingCallback_ = null;
@@ -287,13 +275,15 @@ class EspeakTtsEngine {
     if (!this.initialized_) {
       // We got a call to speak before we're initialized. Enqueue this until
       // we're ready.
-      this.pendingCallback_ =
-          this.onSpeak.bind(this, utterance, options, callback);
+      this.pendingCallback_ = this.onSpeak.bind(this, ...arguments);
       return;
     }
 
     this.ttsEngineApiCallback_ = callback;
     this.utterance_ = utterance;
+
+    this.sampleRate_ = audioStreamOptions.sampleRate;
+    this.bufferSize_ = audioStreamOptions.bufferSize;
 
     var espeakVoiceName =
         this.getBestEspeakVoice(options.voiceName, options.lang);
@@ -310,27 +300,6 @@ class EspeakTtsEngine {
     // eSpeak pitches range from 0 to 99, with 50 as the default.
     var pitch = Math.min(Math.max(Math.floor(options.pitch * 50), 0), 99);
     this.tts_.set_pitch(pitch);
-
-    var volume = Math.min(Math.max(options.volume, 0.0), 1.0);
-    this.ttsStream_.setVolume(volume);
-    const owner = this;
-    this.ttsStream_.play().then(ttsEventObserver => {
-      new mojo.Binding(chromeos.tts.mojom.TtsEventObserver, new class {
-        onStart() {
-          owner.scheduleTimepointEvent(0, 'start');
-        }
-
-        onTimepoint(charIndex) {
-          owner.scheduleTimepointEvent(charIndex, 'word');
-        }
-
-        onEnd() {
-          owner.scheduleTimepointEvent(owner.utterance_.length, 'end');
-        }
-
-        onError() {}
-      }(), ttsEventObserver.eventObserver);
-    });
 
     var handleEvents =
         function(utteranceId, samples, events) {
@@ -413,16 +382,17 @@ class EspeakTtsEngine {
     var didSendBuffers = false;
     while (i < len) {
       var chunkLen =
-          Math.min(this.bufferLen_ - this.currentBufferIndex_, len - i);
+          Math.min(this.bufferSize_ - this.currentBufferIndex_, len - i);
       if (!this.currentBuffer_) {
-        this.currentBuffer_ = new Float32Array(this.bufferLen_);
+        this.currentBuffer_ = new Float32Array(this.bufferSize_);
       }
       this.currentBuffer_.set(
           samples.subarray(i, i + chunkLen), this.currentBufferIndex_);
       i += chunkLen;
       this.currentBufferIndex_ += chunkLen;
-      if (this.currentBufferIndex_ == this.bufferLen_) {
-        this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
+      if (this.currentBufferIndex_ == this.bufferSize_) {
+        this.ttsEngineApiCallback_(
+            {audioBuffer: this.currentBuffer_, charIndex, isLastBuffer: isEnd});
         didSendBuffers = true;
         charIndex = -1;
 
@@ -433,7 +403,8 @@ class EspeakTtsEngine {
 
     // Push final buffer, not complete.
     if (isEnd && this.currentBufferIndex_ > 0) {
-      this.ttsStream_.sendAudioBuffer(this.currentBuffer_, charIndex, isEnd);
+      this.ttsEngineApiCallback_(
+          {audioBuffer: this.currentBuffer_, charIndex, isLastBuffer: isEnd});
       didSendBuffers = true;
       this.currentBufferIndex_ = 0;
       this.currentBuffer_ = null;
@@ -445,20 +416,6 @@ class EspeakTtsEngine {
       this.playing_ = true;
       this.startTime_ = new Date();
     }
-  };
-
-  /**
-   * Schedules an event to be fired indicating progress of speech synthesis.
-   */
-  scheduleTimepointEvent(textPosition, eventType) {
-    if (!this.ttsEngineApiCallback_) {
-      return;
-    }
-
-    if (textPosition < 0) {
-      return;
-    }
-    this.ttsEngineApiCallback_({'type': eventType, 'charIndex': textPosition});
   }
 }
 
