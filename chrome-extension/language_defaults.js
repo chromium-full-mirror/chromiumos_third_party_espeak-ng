@@ -15,7 +15,6 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     // Don't enable these languages by default because
     // they duplicatea a language provided by Google's engine.
     case "inc/hi":  // Hindi
-    case "poz/id":  // Indonesian
     case "gmw/nl":  // Dutch
     case "ko":  // Korean
     case "roa/it":  // Italian
@@ -107,6 +106,7 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "grk/el":  // Greek
     case "inc/gu":  // Gujarati
     case "urj/hu":  // Hungarian
+    case "poz/id":  // Indonesian
     case "dra/kn":  // Kannada
     case "bat/lv":  // Latvian
     case "bat/lt":  // Lithuanian
