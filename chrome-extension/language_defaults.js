@@ -16,8 +16,6 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     // they duplicatea a language provided by Google's engine.
     case "inc/hi":  // Hindi
     case "gmw/nl":  // Dutch
-    case "ko":  // Korean
-    case "roa/it":  // Italian
     case "roa/fr-BE":  // French (Belgium)
     case "roa/fr-CH":  // French (Switzerland)
     case "roa/fr":  // French (France)
@@ -25,7 +23,6 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "roa/es-419":  // Spanish (Latin America)
     case "roa/pt":  // Portuguese (Portugal)
     case "roa/pt-BR":  // Portuguese (Brazil)
-    case "gmw/de":  // German
     case "gmw/en-029":  // English (Caribbean)
     case "gmw/en":  // English (Great Britain)
     case "gmw/en-GB-scotland":  // English (Scotland)
@@ -103,11 +100,14 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "gmq/da":  // Danish
     case "urj/et":  // Estonian
     case "urj/fi":  // Finnish
+    case "gmw/de":  // German
     case "grk/el":  // Greek
     case "inc/gu":  // Gujarati
     case "urj/hu":  // Hungarian
     case "poz/id":  // Indonesian
+    case "roa/it":  // Italian
     case "dra/kn":  // Kannada
+    case "ko":  // Korean
     case "bat/lv":  // Latvian
     case "bat/lt":  // Lithuanian
     case "poz/ms":  // Malay
