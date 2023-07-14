@@ -1,4 +1,4 @@
-﻿
+
 abazia $3
 abbadia $3
 abbain	ab:a'i:n
@@ -65,6 +65,7 @@ adit	$1
 admet  $alt
 adorn  $alt2
 adultere	$2
+adulter	$2
 aed  $alt
 aerea	a'E:Rea
 aeree	$2
@@ -259,6 +260,7 @@ antinoe $2
 antiope	ant'iope
 antipatr $2
 antisepsi  $alt
+antirollio	$4
 antisom $3  $alt
 antitesi $2
 antiuomo	anti||U'Omo
@@ -495,7 +497,7 @@ belv	$alt2
 belvedere $3  $alt2
 belzebù	beldz,Eb'u
 bemb  $alt
-benemerito	$3
+benemerit	$3
 benessere  $alt
 benevol  $alt
 benton  $alt
@@ -533,6 +535,7 @@ biond	bj'ond
 biondine	$2
 biosintesi $2
 biotop $2
+bipartisan	$2
 bipede $1
 bipol $2
 bipost  $alt2
@@ -569,6 +572,7 @@ bonden  $alt2
 bonnanar $2
 bonos  $alt
 bontebok $1  $alt
+borbottio	$3
 bore  $alt
 borea $1
 borg  $alt2
@@ -596,6 +600,7 @@ bradan $1
 bradip $1
 bragadin $3
 bred  $alt
+brefotrofio	$alt
 bregan $1  $alt
 bren  $alt2
 brentonic  $alt2
@@ -605,6 +610,7 @@ brev	$alt
 brianzol $3
 brillio	$2
 brindisi $1
+brioscine	$3
 brisgovia  $alt
 broccostell  $alt2
 brod  $alt
@@ -621,6 +627,7 @@ bronzin	b@-*ondz'in
 brufoli	$1
 brugol $1
 brusi $2
+brusio	b@-*uz'io
 buccari $1
 buccin $1
 buccine	$2
@@ -632,7 +639,7 @@ buia  b'uja
 buio  b'u:jo
 buon	bw2,On	$only
 buona	bu'Ona
-buonasera	bw2,Ona_|s'eRa
+buonasera	bw2,Ona_||s'eRa
 buone	bu'One
 buoni	bu'Oni
 buono	bu'Ono
@@ -713,6 +720,7 @@ capofila	$3
 capolavor  $alt2
 capoliveri $3
 capoluog  $alt
+capostipiti	$3
 cappellania $4
 cappuccine	$3
 caprifogli  $alt
@@ -851,6 +859,7 @@ cetr  $alt2
 cheliceri $2
 cheope $1
 cheradi $1
+chicchessia	kikes:'ia
 chiacchierio	$3
 chiavari $1
 chichibi $3
@@ -874,6 +883,7 @@ cigol	$1
 cigolio	$3
 ciliegi  $alt
 ciliegia $3  $alt
+ciliegine	$4
 cimeg $1
 cimolais $3
 cincischio	$3
@@ -1003,8 +1013,8 @@ coniug	k'oniudZ
 conn  $alt2
 cons  $alt
 consci  $alt
-console  $alt
-conson $1  $alt
+console	k'Onsole
+consoli	k'Onsoli
 consuet  $alt
 contadine	$3
 contafili	$3
@@ -1054,6 +1064,7 @@ corporeo	$2
 corred  $alt
 corrett  $alt
 corrid $2
+corridoi	koR*id'oj
 corrott  $alt2
 cors	$alt2
 cort	$alt2
@@ -1120,6 +1131,7 @@ cuoi  $alt
 cupol $1
 curazia $3
 curcum $1
+curiosi	$alt2
 cuscut $1
 custode  $alt
 custodi	$2 $alt
@@ -1127,6 +1139,7 @@ custodia  $alt
 dafni $2
 dagherrotip $3
 dagherrotipia $5
+dajece	d'a:jetSe/
 dalmat $1
 damar $1
 damocle $1
@@ -1185,6 +1198,7 @@ diacon $1
 diaconia $3
 diacronia	$3
 diadem  $alt
+diafisi	di'afizi
 diagnosi $1
 dialett  $alt
 dialisi	dI'a:lizi
@@ -1215,6 +1229,7 @@ diesis  $alt
 diet  $alt
 difett  $alt
 diglossia $3
+dimension	$alt2
 dimer $1
 dimetr $1
 dinam $1
@@ -1232,6 +1247,7 @@ diplomazie	diplomats'ie/
 dipol $2
 dipylon $1
 dirett  $alt
+disamina	$2
 disarmonia	$4
 disarmonie	diza@-*mon'ie
 disartrie	$3
@@ -1276,7 +1292,8 @@ doma	$alt
 domandone	$3
 domenic	$alt2
 domicili	$3
-domin $1
+domini	$2
+domino	$1
 domusnovas  $alt
 don  $alt2
 dondolio	$3
@@ -1457,6 +1474,7 @@ erd  $alt2
 ereb $1
 erede  $alt
 erem $1
+erett	$alt
 ergosterol $4
 erigone $2
 eritem  $alt
@@ -1549,6 +1567,7 @@ falcon $2
 faleci  $alt
 falment  $alt
 famedi  $alt
+famosi	$alt2
 fantocci  $alt
 farmaceutic $3
 farmacia  fa@-*matS'i:a
@@ -1577,6 +1596,7 @@ feltr  $alt2
 feltre  $alt2
 femin $1  $alt2
 femmin $1
+femminicidi	$4
 femminile $3
 femore $1  $alt
 fenicotter  $alt
@@ -1640,6 +1660,7 @@ fobia $2
 foder $1
 fogli  $alt
 foglia  $alt
+foglie	$alt
 fol  $alt
 folag $1
 folgaria $3
@@ -1801,6 +1822,7 @@ gipsotec  $alt
 girasol	dZiRas'ol
 girellio	$3
 girostat $2
+girovago	$2
 giuggiol $1
 giulianov  $alt
 giuria $2
@@ -1837,6 +1859,7 @@ goliardie	golia@-*d'i:e
 gomit $1  $alt2
 gomitoli	$2
 gomm  $alt2
+gommini	$2
 gommoresine	$3
 gonars $2
 gonartria	$3
@@ -1846,7 +1869,7 @@ gonnes  $alt
 gorga		$alt2
 gorgia $1
 gorgoglii	go@-*gol^'i:I
-gorgonzol $3
+gorgonzol	go@-*gondz'Ol
 got  $alt
 goti  $alt
 gotta	$alt2
@@ -1919,6 +1942,7 @@ impet $1
 impieg  $alt
 implicit $2
 improperi	imp@-*'op,eRi $only
+incantesim	inkant'ezim
 incazzati	ink,a_ts'ati
 incerti	$2 $alt
 incipit	'intSipit
@@ -2126,6 +2150,7 @@ levanz $1  $alt
 leve  $alt
 lezioncine	$3
 liber $1
+libido	$2
 licantrop $2
 licomede  $alt
 liet  $alt
@@ -2156,6 +2181,7 @@ lodol	$1
 log  $alt
 loggia  $alt
 logli  $alt
+logopedia	$4
 logorio	$3
 lol  $alt
 lombrichi	$2
@@ -2166,6 +2192,7 @@ lonicer $2
 lord  $alt2
 loreggia  $alt
 lot  $alt
+luccichio	$3
 lucciolio	$3
 lucifug $2
 lugubra	$1
@@ -2173,6 +2200,7 @@ lugubre $1
 lugubri	$1
 lumac $2
 luog  $alt
+luoghi	$alt
 luteo $1
 macabr $1
 macac $2
@@ -2276,6 +2304,7 @@ materia $2
 materie	$2
 matricid	$3
 matron  $alt
+mattugia	$2
 mazzaccher $2
 medi  $alt
 media  $alt
@@ -2344,7 +2373,6 @@ meteore $2
 metil	$2
 metod  $alt
 metodi  $alt
-metr  $alt2
 mezenzi  $alt
 mezz  $alt
 mezzadria	medz:ad@-*'ia
@@ -2424,6 +2452,7 @@ molluschicidi	$4
 moloch  $alt
 molochi  $alt
 molotr $1  $alt
+molotov	$1 $only
 molten  $alt2
 molv  $alt
 mombarocci  $alt
@@ -2586,6 +2615,7 @@ nucleo	$1
 nucleoprotein	n'ukleo||p@-*ote'in
 nucleosintesi $4
 numer $1
+numerosi	$alt2
 nunatak $3
 nuot  $alt
 nuov  $alt
@@ -2696,6 +2726,7 @@ ossa		$alt2
 ossea	$1
 ossee	$1
 osseo $1
+ossei	$1
 ossequi  $alt
 osset  $alt
 ossia $2
@@ -2712,7 +2743,6 @@ ot  $alt
 otre  $alt2
 ottaedr  $alt
 ottagon $2
-ottenere $3  $alt2
 ottic  $alt
 ottim  $alt
 ottoboni  $alt
@@ -2738,6 +2768,7 @@ palagonia $4
 palamede  $alt
 palemone  $alt
 palen  $alt2
+palindrom	$2
 palingenesi $3
 pallanuot  $alt
 pallare $1
@@ -2775,6 +2806,7 @@ paraurti $3
 paravia $3
 parenchim  $alt
 parentesi	$2  $alt
+pareti	$alt2
 parere $2  $alt2
 parghelia $3
 paria $2
@@ -2810,6 +2842,7 @@ pecor $1  $alt
 ped  $alt
 pedagog  $alt
 pedaven  $alt2
+pediatrici	$2
 pedodonzia	$4
 pedogenesi $3
 pegaso	p'E:gazo
@@ -2817,7 +2850,6 @@ peggi  $alt
 pel  $alt2
 pelag $1
 pelaverg  $alt2
-pell  $alt2
 pelope $1
 peloponnes  $alt
 pelos$alt2
@@ -2825,6 +2857,8 @@ pelot  $alt
 pemfig  $1 $alt
 pena	$alt2
 pend  $alt2
+pendice	$2
+pendici	$2
 pendio $2
 pendol  $alt
 pendul  $alt
@@ -2972,6 +3006,9 @@ plumbee	$1
 plumbei	$1
 plumbeo	$1
 plurigemin	$3
+poche	$alt
+po'	p'O
+pochi	$alt
 pocol $2
 podere $2  $alt2
 podi  $alt
@@ -2989,6 +3026,7 @@ polesia $2  $alt
 polesine	$2 $alt2
 polia $2
 poliammine	$4
+poliandria	$4
 policrate $2
 policrom $2
 poliedr  $alt
@@ -3106,6 +3144,7 @@ prodigo	$1
 prodott  $alt2
 proemi  $alt
 proenzim	p@-*o-endz'im
+professor	$alt2
 profet  $alt
 profezia $3
 profil $2
@@ -3116,7 +3155,7 @@ profughi	$1 $alt
 progenie  $alt
 progett  $alt
 prognosi $1  $alt
-proiett  $alt
+programmini	$3
 pronao  $alt
 propanol $3
 propedeutic $3
@@ -3282,6 +3321,7 @@ ribattezzare	@-*i_bat:edz:'aRe
 ribec  $alt
 ribollio	$3
 ribosi  $alt
+ricasoli	$alt2
 riccoboni  $alt
 ricerc  $alt2
 ricevitoria	$5
@@ -3350,7 +3390,7 @@ romboedr  $alt
 rompiscatole $3
 rondini	$1
 rondone	$2
-ronsio	@-*ondz'io
+ronzio	@-*ondz'io
 ropaloceri $3
 rore  $alt
 ros  $alt
@@ -3747,6 +3787,7 @@ stereotip	$3
 stesicor $2
 stigmate $1
 stilobate $2
+stipiti	$1
 stom	$alt
 stomaci	$1
 stop	$alt
@@ -3954,7 +3995,7 @@ tolf  $alt
 tolmezz  $alt
 toltechi  $alt
 tolve  $alt
-tomi  $alt
+tom	$alt
 ton  $alt
 toni  $alt
 tonn  $alt2
@@ -3972,6 +4013,7 @@ torni  $alt2
 tornol  $alt2
 torped  $alt
 torpedini	$2
+torr	$alt2
 torrile	$2
 tors  $alt2
 tortor $1  $alt2
@@ -4006,7 +4048,9 @@ tratalias $3
 traversie	$2
 travesi  $alt
 tre	t@-*'e
+trenta	$alt2
 trebaseleghe $3  $alt2
+treccine	$2
 tredicesim  $alt
 tredici  $alt2
 tremil $2
@@ -4015,6 +4059,7 @@ trentenn	$alt
 treppied	$alt
 tres  $alt
 tresette	t@-*es'Et:e
+tremit	$1
 treveri $1  $alt
 treves  $alt
 treviri $1
@@ -4141,6 +4186,7 @@ vescic $2
 vescov $1
 vescovil	$3
 vesp  $alt
+vesper	$1
 vespasian $3
 vespr  $alt
 vestenanov  $alt

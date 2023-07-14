@@ -45,9 +45,13 @@ eSpeakNG.prototype.handleEvent = function (evt) {
 function _createAsyncMethod(method) {
   return function() {
     var lastArg = arguments[arguments.length - 1];
-    var message = { method: method, args: Array.prototype.slice.call(arguments, 0) };
+    var message = {
+      method: method,
+      args: Array.prototype.slice.call(arguments, 0)
+    };
     if (typeof lastArg == 'function') {
-      var callback = '_' + method + '_' + Math.random().toString().substring(2) +'_cb';
+      var callback = '_' + method +
+          '_' + Math.random().toString().substring(2) +'_cb';
       this[callback] = lastArg;
       message.args.pop();
       message.callback = callback;

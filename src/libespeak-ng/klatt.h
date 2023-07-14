@@ -24,8 +24,8 @@
 #ifndef ESPEAK_NG_KLATT_H
 #define ESPEAK_NG_KLATT_H
 
-#include "speech.h"
-#include "synthesize.h"
+#include "voice.h"                    // for voice_t
+#include "synthesize.h"              // for frame_t, WGEN_DATA
 
 #ifdef __cplusplus
 extern "C"
@@ -73,7 +73,7 @@ typedef struct {
 	long T0;        /* Fundamental period in output samples times 4 */
 	long nopen;     /* Number of samples in open phase of period    */
 	long nmod;      /* Position in period to begin noise amp. modul */
-	long nrand;     /* Varible used by random number generator      */
+	long nrand;     /* Variable used by random number generator      */
 	double pulse_shape_a; /* Makes waveshape of glottal pulse when open   */
 	double pulse_shape_b; /* Makes waveshape of glottal pulse when open   */
 	double minus_pi_t;
@@ -89,9 +89,10 @@ typedef struct {
 	double amp_gain0; /* G0 converted to linear gain              */
 	int num_samples; /* number of glottal samples */
 	double sample_factor; /* multiplication factor for glottal samples */
-	short *natural_samples; /* pointer to an array of glottal samples */
+	const short *natural_samples; /* pointer to an array of glottal samples */
 	long original_f0; /* original value of f0 not modified by flutter */
 
+	int fadein;
 	int fadeout;       // set to 64 to cause fadeout over 64 samples
 	int scale_wav;     // depends on the voicing source
 
@@ -111,9 +112,6 @@ typedef struct {
 #define Rnpp 10
 #define R1p  11
 #define R2p  12
-#define R3p  13
-#define R4p  14
-#define R5p  15
 #define R6p  16
 
 #define RGL  17
@@ -178,9 +176,9 @@ typedef struct {
 }  klatt_peaks_t;
 
 void KlattInit(void);
+void KlattFini(void);
 void KlattReset(int control);
-int Wavegen_Klatt2(int length, int resume, frame_t *fr1, frame_t *fr2);
-
+int Wavegen_Klatt(int length, int resume, frame_t *fr1, frame_t *fr2, WGEN_DATA *wdata, voice_t *wvoice);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-﻿// Japanese
+// Japanese
 //
 // Copyright (C) 2017 Reece H. Dunn
 //
@@ -206,6 +206,16 @@
 	// U+1B000 - U+1B001	Kana Supplement ---------------------
 	𛀀	え	// e:	U+1B000 => U+3048 (archaic)
 
+	‐	ー	//	U+2010 => U+30FC
+	‑	ー	//	U+2011 => U+30FC
+	–	ー	//	U+2013 => U+30FC
+	—	ー	//	U+2014 => U+30FC
+	―	ー	//	U+2015 => U+30FC
+	−	ー	//	U+2212 => U+30FC
+	⁓	ー	//	U+2053 => U+30FC
+	〜	ー	//	U+301C => U+30FC
+	〰	ー	//	U+3030 => U+30FC
+
 // Hiragana Groups -- By Starting Consonant
 
 //	a  i  u  e  o  *
@@ -269,6 +279,8 @@
 	い゙い	vi:		// vī (Katakana)
 	い゙ぃ	vi:		// vī (Katakana)
 	い゙ー	vi:		// vī (Katakana)
+	いぇ	je		// ye
+	いぇー	je:		// yē
 
 .group う
 	う	u		// u
@@ -279,6 +291,22 @@
 	ゔう	vu:		// vū
 	ゔぅ	vu:		// vū
 	ゔー	vu:		// vū
+	ゔぁ	va		// va
+	ゔぁー	va:		// vā
+	ゔぃ	vi		// vi
+	ゔぃー	vi:		// vī
+	ゔぇ	ve		// ve
+	ゔぇー	ve:		// vē
+	ゔぉ	vo		// vo
+	ゔぉー	vo:		// vō
+	うぃ	wi		// wi
+	うぃー	wi:		// wī
+	うぇ	we		// we
+	うぇー	we:		// wē
+	うぉ	wo		// wo
+	うぉー	wo:		// wō
+	ゔゅ	v_ju		// vyu
+	ゔゅー	v_ju:		// vyū
 
 .group え
 	え	e		// e
@@ -331,6 +359,22 @@
 	ぐう	gu:		// gū
 	ぐぅ	gu:		// gū
 	ぐー	gu:		// gū
+	くぁ	ka		// ka
+	くぁー	ka:		// kā
+	くぃ	kwi		// kwi
+	くぃー	kwi:		// kwī
+	くぇ	kwe		// kwe
+	くぇー	kwe:		// kwē
+	くぉ	kwo		// kwo
+	くぉー	kwo:		// kwō
+	ぐぁ	ga		// ga
+	ぐぁー	ga:		// gā
+	ぐぃ	gwi		// gwi
+	ぐぃー	gwi:		// gwī
+	ぐぇ	gwe		// gwe
+	ぐぇー	gwe:		// gwē
+	ぐぉ	gwo		// gwo
+	ぐぉー	gwo:		// gwō
 
 .group け
 	け	ke		// ke
@@ -373,6 +417,10 @@
 	じぃ	d_z\\i:		// jī
 	じー	d_z\\i:		// jī
 	じ (L21	d_z\\		// j([auo]
+	しぇ	s\\e		// she
+	しぇー	s\\e:		// shē
+	じぇ	d_z\\e		// je
+	じぇー	d_z\\e:		// jē
 
 .group す
 	す	su		// su
@@ -425,6 +473,10 @@
 	ぢぃ	d_z\\i:		// jī		(obsolete)
 	ぢー	d_z\\i:		// jī		(obsolete)
 	ぢ (L21	d_z\\		// j([auo]	(obsolete)
+	ちぇ	t_s\\e		// che
+	ちぇー	t_s\\e:		// chē
+	ぢぇ	d_z\\e		// je		(obsolete)
+	ぢぇー	d_z\\e:		// jē		(obsolete)
 
 .group つ
 	つ	t_su		// tsu
@@ -435,6 +487,22 @@
 	づう	zu:		// zū
 	づぅ	zu:		// zū
 	づー	zu:		// zū
+	つぁ	t_sa		// tsa
+	つぁー	t_sa:		// tsā
+	つぃ	t_swi		// tswi
+	つぃー	t_swi:		// tswī
+	つぇ	t_se		// tse
+	つぇー	t_se:		// tsē
+	つぉ	t_so		// tso
+	つぉー	t_so:		// tsō
+	づぁ	za		// za
+	づぁー	za:		// zā
+	づぃ	d_z\\i		// ji
+	づぃー	d_z\\i:		// jī
+	づぇ	ze		// ze
+	づぇー	ze:		// zē
+	づぉ	zo		// zo
+	づぉー	zo:		// zō
 
 .group て
 	て	te		// te
@@ -445,6 +513,14 @@
 	でえ	de:		// dē
 	でぇ	de:		// dē
 	でー	de:		// dē
+	てぃ	ti		// ti
+	てぃー	ti:		// tī
+	でぃ	di		// di
+	でぃー	di:		// dī
+	でゅ	d_ju		// dyu
+	でゅー	d_ju:		// dyū
+	てゅ	t_ju		// tyu
+	てゅー	t_ju:		// tyū
 
 .group と
 	と	to		// to
@@ -455,6 +531,10 @@
 	どお	do:		// dō
 	どぉ	do:		// dō
 	どー	do:		// dō
+	とぅ	tu		// tu
+	とぅー	tu:		// tū
+	どぅ	du		// du
+	どぅー	du:		// dū
 
 .group な
 	な	na		// na
@@ -531,6 +611,14 @@
 	ぷう	pu:		// pū
 	ぷぅ	pu:		// pū
 	ぷー	pu:		// pū
+	ふぁ	p\\a		// fa
+	ふぁー	p\\a:		// fā
+	ふぃ	p\\i		// fi
+	ふぃー	p\\i:		// fī
+	ふぇ	p\\e		// fe
+	ふぇー	p\\e:		// fē
+	ふぉ	p\\o		// fo
+	ふぉー	p\\o:		// fō
 
 .group へ
 	へ	he		// he
@@ -712,6 +800,9 @@
 	っ	(L08	t	// t.ch
 	っ	(L09	t	// t.ts
 	っ	(L10	d	// d.d
+	っ	(L11	n	// n.n
+	っ	(L12	h	// h.h
+	っ	(L13	p	// p.p
 	っ	(L14	b	// b.b
 	っ	(L15	p	// p.p
 	っ	(L16	m	// m.m

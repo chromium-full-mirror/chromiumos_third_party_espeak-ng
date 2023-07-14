@@ -34,15 +34,15 @@
 
 #include "dictionary.h"
 #include "mbrola.h"
-#include "readclause.h"
 #include "setlengths.h"
 #include "synthdata.h"
 #include "wavegen.h"
 
 
-#include "speech.h"
+#include "common.h"
 #include "phoneme.h"
 #include "voice.h"
+#include "speech.h"
 #include "synthesize.h"
 #include "translate.h"
 
@@ -50,7 +50,7 @@
 int mbrola_delay;
 char mbrola_name[20];
 
-#ifdef INCLUDE_MBROLA
+#if USE_MBROLA
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -77,7 +77,7 @@ espeak_ng_STATUS LoadMbrolaTable(const char *mbrola_voice, const char *phtrans, 
 	mbr_name_prefix = 0;
 
 	if (mbrola_voice == NULL) {
-		samplerate = samplerate_native;
+		samplerate = samplerate;
 		SetParameter(espeakVOICETYPE, 0, 0);
 		return ENS_OK;
 	}
@@ -86,7 +86,7 @@ espeak_ng_STATUS LoadMbrolaTable(const char *mbrola_voice, const char *phtrans, 
 		return ENS_MBROLA_NOT_FOUND;
 
 	sprintf(path, "%s/mbrola/%s", path_home, mbrola_voice);
-#ifdef PLATFORM_POSIX
+#if PLATFORM_POSIX
 	// if not found, then also look in
 	//   usr/share/mbrola/xx, /usr/share/mbrola/xx/xx, /usr/share/mbrola/voices/xx
 	if (GetFileLength(path) <= 0) {
@@ -97,6 +97,19 @@ espeak_ng_STATUS LoadMbrolaTable(const char *mbrola_voice, const char *phtrans, 
 
 			if (GetFileLength(path) <= 0)
 				sprintf(path, "/usr/share/mbrola/voices/%s", mbrola_voice);
+
+			// Show error message
+			if (GetFileLength(path) <= 0) {
+				fprintf(stderr, "Cannot find MBROLA voice file '%s' in neither of paths:\n"
+						" - /usr/share/mbrola/%s\n"
+						" - /usr/share/mbrola/%s/%s\n"
+						" - /usr/share/mbrola/voices/%s\n"
+						"Please install necessary MBROLA voice!\n",
+						mbrola_voice, mbrola_voice, mbrola_voice, mbrola_voice, mbrola_voice);
+				// Set path back to simple name, otherwise it shows misleading error only for
+				// last unsuccessfully searched path
+				sprintf(path, "%s", mbrola_voice);
+			}
 		}
 	}
 	close_MBR();
@@ -228,7 +241,7 @@ static char *WritePitch(int env, int pitch1, int pitch2, int split, int final)
 	int pitch_base;
 	int pitch_range;
 	int p1, p2, p_end;
-	unsigned char *pitch_env;
+	const unsigned char *pitch_env;
 	int max = -1;
 	int min = 999;
 	int y_max = 0;
@@ -239,6 +252,8 @@ static char *WritePitch(int env, int pitch1, int pitch2, int split, int final)
 	int env_split;
 	char buf[50];
 	static char output[50];
+
+	MAKE_MEM_UNDEFINED(&output, sizeof(output));
 
 	output[0] = 0;
 	pitch_env = envelope_data[env];
@@ -335,6 +350,7 @@ int MbrolaTranslate(PHONEME_LIST *plist, int n_phonemes, bool resume, FILE *f_mb
 	const char *final_pitch;
 	char *ptr;
 	char mbr_buf[120];
+	char phbuf[5];
 
 	static int phix;
 	static int embedded_ix;
@@ -361,9 +377,9 @@ int MbrolaTranslate(PHONEME_LIST *plist, int n_phonemes, bool resume, FILE *f_mb
 		if (p->synthflags & SFLAG_EMBEDDED)
 			DoEmbedded(&embedded_ix, p->sourceix);
 
-		if (p->newword & 4)
+		if (p->newword & PHLIST_START_OF_SENTENCE)
 			DoMarker(espeakEVENT_SENTENCE, (p->sourceix & 0x7ff) + clause_start_char, 0, count_sentences);
-		if (p->newword & 1)
+		if (p->newword & PHLIST_START_OF_SENTENCE)
 			DoMarker(espeakEVENT_WORD, (p->sourceix & 0x7ff) + clause_start_char, p->sourceix >> 11, clause_start_word + word_count++);
 
 		name = GetMbrName(p, ph, ph_prev, ph_next, &name2, &len_percent, &control);
@@ -390,7 +406,7 @@ int MbrolaTranslate(PHONEME_LIST *plist, int n_phonemes, bool resume, FILE *f_mb
 			DoPhonemeMarker(espeakEVENT_PHONEME, (p->sourceix & 0x7ff) + clause_start_char, 0, phoneme_name);
 		}
 
-		ptr += sprintf(ptr, "%s\t", WordToString(name));
+		ptr += sprintf(ptr, "%s\t", WordToString(phbuf, name));
 
 		if (name2 == '_') {
 			// add a pause after this phoneme
@@ -423,7 +439,7 @@ int MbrolaTranslate(PHONEME_LIST *plist, int n_phonemes, bool resume, FILE *f_mb
 				ptr += sprintf(ptr, "%d\t%s", len1, pitch);
 
 				pitch = WritePitch(p->env, p->pitch1, p->pitch2, -len_percent, 0);
-				ptr += sprintf(ptr, "%s\t%d\t%s", WordToString(name2), len-len1, pitch);
+				ptr += sprintf(ptr, "%s\t%d\t%s", WordToString(phbuf, name2), len-len1, pitch);
 			}
 			done = true;
 			break;
@@ -475,7 +491,7 @@ int MbrolaTranslate(PHONEME_LIST *plist, int n_phonemes, bool resume, FILE *f_mb
 		if (!done) {
 			if (name2 != 0) {
 				len1 = (len * len_percent)/100;
-				ptr += sprintf(ptr, "%d\n%s\t", len1, WordToString(name2));
+				ptr += sprintf(ptr, "%d\n%s\t", len1, WordToString(phbuf, name2));
 				len -= len1;
 			}
 			ptr += sprintf(ptr, "%d%s\n", len, final_pitch);

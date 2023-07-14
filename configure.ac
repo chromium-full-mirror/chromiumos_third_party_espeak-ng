@@ -1,5 +1,5 @@
 AC_PREREQ([2.63])
-AC_INIT([eSpeak NG], [1.49.3-dev], [https://github.com/espeak-ng/espeak-ng/issues], [espeak-ng], [https://github.com/espeak-ng/espeak-ng])
+AC_INIT([eSpeak NG], [1.52-dev], [https://github.com/espeak-ng/espeak-ng/issues], [espeak-ng], [https://github.com/espeak-ng/espeak-ng])
 AM_INIT_AUTOMAKE()
 LT_INIT
 
@@ -32,6 +32,10 @@ AC_ARG_WITH([klatt],
     [AS_HELP_STRING([--with-klatt], [enable the Klatt formant synthesizer @<:@default=yes@:>@])],
     [])
 
+AC_ARG_WITH([speechplayer],
+    [AS_HELP_STRING([--with-speechplayer], [enable the speechPlayer Klatt implementation @<:@default=yes@:>@])],
+    [])
+
 AC_ARG_WITH([mbrola],
     [AS_HELP_STRING([--with-mbrola], [enable the MBROLA speech synthesizer @<:@default=yes@:>@])],
     [])
@@ -45,19 +49,23 @@ AC_ARG_WITH([async],
     [])
 
 AC_ARG_WITH([extdict-ru],
-    [AS_HELP_STRING([--with-extdict-ru], [use the extended Russian Dictionary file @<:@default=no@:>@])],
+    [AS_HELP_STRING([--with-extdict-ru], [use the extended Russian Dictionary file @<:@default=yes@:>@])],
     [])
 
-AC_ARG_WITH([extdict-zh],
-    [AS_HELP_STRING([--with-extdict-zh], [use the extended Mandarin Chinese Dictionary file @<:@default=no@:>@])],
+AC_ARG_WITH([extdict-cmn],
+    [AS_HELP_STRING([--with-extdict-cmn], [use the extended Mandarin Chinese Dictionary file @<:@default=yes@:>@])],
     [])
 
-AC_ARG_WITH([extdict-zhy],
-    [AS_HELP_STRING([--with-extdict-zhy], [use the extended Cantonese Chinese Dictionary file @<:@default=no@:>@])],
+AC_ARG_WITH([extdict-yue],
+    [AS_HELP_STRING([--with-extdict-yue], [use the extended Cantonese Chinese Dictionary file @<:@default=yes@:>@])],
     [])
 
 AC_ARG_WITH([libfuzzer],
     [AS_HELP_STRING([--with-libfuzzer], [enable libFuzzer in the fuzzer tests @<:@default=no@:>@])],
+    [])
+
+AC_ARG_WITH([coverage],
+    [AS_HELP_STRING([--with-coverage], [enable clang coverage in the fuzzer tests (also add coverage to lib sources) @<:@default=no@:>@])],
     [])
 
 dnl ================================================================
@@ -65,24 +73,23 @@ dnl Program checks.
 dnl ================================================================
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_LN_S
-
-AC_CHECK_PROG(NDKBUILD_CHECK,[ndk-build],yes)
 
 dnl ================================================================
 dnl gradle checks.
 dnl ================================================================
 
 AC_MSG_CHECKING([for gradle])
-if test -e ${GRADLE} ; then
-    AC_MSG_RESULT([${GRADLE}])
-    AM_CONDITIONAL(HAVE_GRADLE, [1])
+if command -v "$GRADLE" >/dev/null; then
+    AC_MSG_RESULT([$GRADLE])
 else
+    GRADLE=
     AC_MSG_RESULT([no])
-    AM_CONDITIONAL(HAVE_GRADLE, [0])
 fi
+AM_CONDITIONAL(HAVE_GRADLE, [test x"$GRADLE" != x])
 
 AC_SUBST(GRADLE)
 
@@ -94,7 +101,7 @@ AC_LANG_PUSH(C)
 AC_MSG_CHECKING([if $CC supports C99 without any flags])
 AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
-		[[static inline int c99_restrict(int *restrict c99_restrict) {}]],
+		[[static inline void c99_restrict(int *restrict c99_restrict) {}]],
 		[[]])],
 	[AC_MSG_RESULT([yes])
 	 have_c99_native=yes],
@@ -108,7 +115,7 @@ CFLAGS="$CFLAGS -std=c99"
 AC_MSG_CHECKING([if $CC supports C99 with the -std=c99 flag])
 AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
-		[[static inline int c99_restrict(int *restrict c99_restrict) {}]],
+		[[static inline void c99_restrict(int *restrict c99_restrict) {}]],
 		[[]])],
 	[AC_MSG_RESULT([yes])
 	 have_c99_c99=yes],
@@ -127,6 +134,19 @@ else
 	AC_MSG_RESULT([no])
 	AC_MSG_ERROR([C99 is not supported by $CC.])
 fi
+
+
+AC_LANG_PUSH(C)
+TEMP_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fsanitize=fuzzer"
+AC_MSG_CHECKING([if $CC supports fuzzer with the -fsanitize=fuzzer flag])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM( [[]], [[]])],
+	[have_fuzzer_fuzzer=yes],
+	[have_fuzzer_fuzzer=no])
+AC_MSG_RESULT($have_fuzzer_fuzzer)
+CFLAGS="$TEMP_CFLAGS"
+AC_LANG_POP(C)
 
 dnl ================================================================
 dnl FreeBSD check.
@@ -201,7 +221,7 @@ else
     AC_CHECK_HEADERS([pcaudiolib/audio.h],
         [
             have_pcaudiolib=yes
-            PCAUDIOLIB_CFLAGS=
+            PCAUDIOLIB_CFLAGS=-DUSE_LIBPCAUDIO=1
             PCAUDIOLIB_LIBS=-lpcaudio
         ],[
             have_pcaudiolib=no
@@ -221,6 +241,12 @@ else
 	have_klatt=yes
 fi
 
+if test "$with_speechplayer" = "no" ; then
+	have_speechplayer=no
+else
+	have_speechplayer=yes
+fi
+
 if test "$with_mbrola" = "no" ; then
 	have_mbrola=no
 else
@@ -232,12 +258,16 @@ if test "$with_sonic" = "no" ; then
 else
     AC_CHECK_HEADERS([sonic.h],
         [
+            SONIC_CFLAGS=-DUSE_LIBSONIC=1
             AC_CHECK_LIB([sonic], [sonicCreateStream])
             have_sonic=yes
         ],[
             have_sonic=no
         ])
 fi
+AC_SUBST(SONIC_CFLAGS)
+
+AC_CHECK_HEADERS([valgrind/memcheck.h])
 
 if test "$with_async" = "no" ; then
 	have_async=no
@@ -246,6 +276,7 @@ else
 fi
 
 AM_CONDITIONAL(OPT_KLATT,  [test x"$have_klatt"  = xyes])
+AM_CONDITIONAL(OPT_SPEECHPLAYER,  [test x"$have_speechplayer"  = xyes])
 AM_CONDITIONAL(OPT_MBROLA, [test x"$have_mbrola" = xyes])
 AM_CONDITIONAL(OPT_ASYNC,  [test x"$have_async"  = xyes])
 
@@ -257,31 +288,33 @@ AC_CHECK_PROG(RONN, ronn, ronn, no)
 
 AM_CONDITIONAL(HAVE_RONN, [test ! x"$RONN" = xno])
 
+AC_CHECK_PROG(KRAMDOWN, kramdown, kramdown, no)
+
 dnl ================================================================
 dnl Extended dictionary checks.
 dnl ================================================================
 
-if test "$with_extdict_ru" = "yes" ; then
-	have_extdict_ru=yes
-else
+if test "$with_extdict_ru" = "no" ; then
 	have_extdict_ru=no
+else
+	have_extdict_ru=yes
 fi
 
-if test "$with_extdict_zh" = "yes" ; then
-	have_extdict_zh=yes
+if test "$with_extdict_cmn" = "no" ; then
+	have_extdict_cmn=no
 else
-	have_extdict_zh=no
+	have_extdict_cmn=yes
 fi
 
-if test "$with_extdict_zhy" = "yes" ; then
-	have_extdict_zhy=yes
+if test "$with_extdict_yue" = "no" ; then
+	have_extdict_yue=no
 else
-	have_extdict_zhy=no
+	have_extdict_yue=yes
 fi
 
 AM_CONDITIONAL(HAVE_RU_EXTENDED_DICTIONARY,  [test x"$have_extdict_ru"  = xyes])
-AM_CONDITIONAL(HAVE_ZH_EXTENDED_DICTIONARY,  [test x"$have_extdict_zh"  = xyes])
-AM_CONDITIONAL(HAVE_ZHY_EXTENDED_DICTIONARY, [test x"$have_extdict_zhy" = xyes])
+AM_CONDITIONAL(HAVE_CMN_EXTENDED_DICTIONARY,  [test x"$have_extdict_cmn"  = xyes])
+AM_CONDITIONAL(HAVE_YUE_EXTENDED_DICTIONARY, [test x"$have_extdict_yue" = xyes])
 
 dnl ================================================================
 dnl Compiler warnings.
@@ -290,11 +323,21 @@ dnl Reference: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 dnl ================================================================
 
 AX_CHECK_COMPILE_FLAG([-Wimplicit],              [CFLAGS="-Wimplicit $CFLAGS"])
+AX_CHECK_COMPILE_FLAG([-Wint-conversion],        [CFLAGS="-Wint-conversion $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wmissing-prototypes],    [CFLAGS="-Wmissing-prototypes $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wreturn-type],           [CFLAGS="-Wreturn-type $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wuninitialized],         [CFLAGS="-Wuninitialized $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wunused],                [CFLAGS="-Wunused $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wunused-parameter],      [CFLAGS="-Wunused-parameter $CFLAGS"])
+
+
+dnl ================================================================
+dnl Enable two-complement signed integer wrapping
+dnl
+dnl Otherwise this is undefined behavior.
+dnl ================================================================
+
+AX_CHECK_COMPILE_FLAG([-fwrapv],                 [CFLAGS="-fwrapv $CFLAGS"])
 
 dnl ================================================================
 dnl libFuzzer checks.
@@ -306,7 +349,19 @@ else
 	have_libfuzzer=no
 fi
 
-AM_CONDITIONAL(HAVE_LIBFUZZER, [test x"$have_libfuzzer" = xyes])
+AM_CONDITIONAL(HAVE_LIBFUZZER, [test x"$have_libfuzzer" = xyes  -a x"$have_fuzzer_fuzzer" = xyes])
+
+dnl ================================================================
+dnl clang-coverage checks.
+dnl ================================================================
+
+if test "$with_coverage" = "yes" ; then
+	use_coverage=yes
+else
+	use_coverage=no
+fi
+
+AM_CONDITIONAL(USE_COVERAGE, [test x"$use_coverage" = xyes])
 
 dnl ================================================================
 dnl Generate output.
@@ -336,14 +391,14 @@ AC_MSG_NOTICE([
         PCAudioLib:                    ${have_pcaudiolib}
 
         gradle (Android):              ${GRADLE}
-        ndk-build (Android):           ${NDKBUILD_CHECK}
 
         Klatt:                         ${have_klatt}
+        speechPlayer:                  ${have_speechplayer}
         MBROLA:                        ${have_mbrola}
         Async:                         ${have_async}
 
         Extended Dictionaries:
             Russian:                   ${have_extdict_ru}
-            Chinese (Mandarin):        ${have_extdict_zh}
-            Chinese (Cantonese):       ${have_extdict_zhy}
+            Chinese (Mandarin):        ${have_extdict_cmn}
+            Chinese (Cantonese):       ${have_extdict_yue}
 ])

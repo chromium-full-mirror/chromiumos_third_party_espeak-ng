@@ -240,14 +240,6 @@ endphoneme
 phoneme I
   vwl starttype #i endtype #i
   length 80
-
-  IF thisPh(isMaxStress) THEN
-    IF prevPhW(j) THEN
-      ChangePhoneme(a)
-    ELSE
-      ChangePhoneme(i)
-    ENDIF
-  ENDIF
   FMT(vwl_ru/ii)
 endphoneme
 
@@ -455,15 +447,12 @@ phoneme V#
   IF thisPh(isMaxStress) THEN
     IF prevPhW(j) THEN
       ChangePhoneme(A)
-    ELSE
-      ChangePhoneme(ja)
     ENDIF
   ENDIF
 
   IF prevPhW(isPalatal) THEN
     ChangePhoneme(V)
   ENDIF
-
   FMT(vowel/V_2)
 endphoneme
 

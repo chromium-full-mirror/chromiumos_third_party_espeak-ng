@@ -1,4 +1,4 @@
-﻿
+
 // You can use the en_extra file, rather than this one
 // to add your own pronunciation definitions.
 
@@ -127,7 +127,7 @@ _$	d0l3
 _%	p3s'Ent
 ?5 _%	pVRs'Ent
 _&	amp@sand
-_'	kwoUt
+_'	t'Ik
 _[	lEftbrakI2t
 _]	raItbrakI2t
 _(	lEftpa#rEn
@@ -451,6 +451,7 @@ _17	s'Ev@nti:n
 ?7 _17  s'@v@nti:n
 _18	'eIti:n
 _19	n'aInti:n
+
 _2X	tw'Ent2i||
 _3X	T'3:ti||
 ?5 _3X	T'IRti||
@@ -462,11 +463,19 @@ _7X	s'Ev@nti||
 _8X	'eIti||
 _9X	n'aInti||
 
+// large numbers, short scale
 _0C	h'VndrI2d
 _0M1	T'aUz@nd
 _0M2	m'Ili@n
 _0M3	b'Ili@n
 _0M4	tr'Ili@n
+_0M5    kw0dr'Ili@n
+_0M6    kwInt'Ili@n
+_0M7    sExt'Ili@n
+_0M8    sEpt'Ili@n
+_0M9    0kt'Ili@n
+_0M10   n0n'Ili@n
+
 ?!3 _0and	@n
 _dpt	pOInt
 _roman	roUm@n_
@@ -476,12 +485,15 @@ _#nd	@nd
 _#rd	d
 _#th	T
 _ord	T	// default ending
+
 _1o	f'3:
 ?5 _1o  f'IR
 _2o	s'Ek
 _3o	T'3:
 ?5 _3o  T'IR
 _5o	f'If
+_12o	tw'Elf
+
 _20o	tw'Enti@
 _30o	T'3:ti@
 ?5 _30o T'IRti@
@@ -492,7 +504,6 @@ _70o	s'Ev@nti@
 _80o	'eIti@
 _90o	n'aInti@
 
-
 // ABBREVIATIONS
 //**************
 
@@ -502,6 +513,7 @@ ac	$abbrev
 acsi	$abbrev
 adf	$abbrev
 adhd	$abbrev
+ado $abbrev $allcaps
 adsl	$abbrev
 ae	$abbrev
 aes	$abbrev
@@ -549,6 +561,7 @@ echr	$abbrev
 edst	$abbrev
 edt	$abbrev
 eff	$abbrev
+efi	$abbrev
 eg	fO@Egz'aamp@L	$only
 eg	$abbrev $allcaps
 (e . g .) fO@Egz'aamp@L
@@ -566,6 +579,7 @@ ftaa	$abbrev
 fyi	$abbrev
 ghz	gIg@h3:ts	$only
 gnupg	g@'nu:pi:dZ'i:
+guid	g'u:Id $only
 hmm	h@m
 hiv	$abbrev
 (http ://)   eItSt2i:t2i:'pi:_
@@ -646,11 +660,13 @@ tbsp	teIb@Lspu:n
 th	T
 thu	T3:        // Thursday
 ?5 thu	TIR        // Thursday
+uia	$abbrev $only
 ucla	$abbrev
 ucl	$abbrev
 ucs	$abbrev
 udp	$abbrev
 ueb	$abbrev
+uefi	$abbrev
 ufo	$abbrev
 ui	$abbrev
 uk	$abbrev
@@ -673,9 +689,9 @@ uuid	$abbrev
 uv	$abbrev
 VI      $abbrev
 webrtc	w'EbA@t2i:s'i:
+winmd	w'In,Emd'i:
 wuxga	$abbrev
 wwii	dVb@Lju:dVb@Lju:t'u:
-xaml	$abbrev
 xl	$abbrev		// not roman 40
 xxx	$abbrev		// not roman 30
 xy	$abbrev
@@ -797,6 +813,7 @@ aha		A:h'A:
 ahem		@h'@m
 ahoy		a#hOI
 aidenn		eId@n
+aira 'aIr@ $only
 airbus		e@bVs
 airpower	'e@p,aU3
 aisle		aI@l
@@ -969,6 +986,7 @@ assess		a#sEs
 astray		$alt3
 astride		$alt3
 asus		eIs@s
+atelier         at@lj'e
 atlas		atl@s
 atop		a#t0p
 atta		at@		$only
@@ -1056,6 +1074,7 @@ beatin		bi:t#In
 bedouin		bEdu:I2n
 beige		beIZ
 belisha		b@l'i:S@
+bellevue        b'Elvju: $only
 bellyaching	bElIeIkIN
 bely		bI#laI
 bereft		bI#rEft
@@ -1084,6 +1103,7 @@ bijou		bi:Zu:
 bikini		bIk'i:ni
 bikiny		bIk'i:ni  // -ed
 binman		bInman
+binghamton      b'IN@mt@n
 bio		baIoU
 biome		baIoUm
 biped		baIpEd
@@ -1094,6 +1114,7 @@ bison		baIs@n
 bitable		baIt@b@L
 bitecha		baItS@
 ?!3 bitumen	bItSu:m@n
+bitwarden b'ItwO@d@n
 bizarre		bI#z'A@
 bizzare		bI#z'A@
 blanc		blA~nk
@@ -1113,6 +1134,7 @@ blurry		bl3:ri
 boardmember	$1
 bobsled		$alt1
 boing		bOIN
+boise	'bOIsi	$only
 bologna		b@loUni
 bolognese	b0l@n'eIz
 bombard		$2
@@ -1126,6 +1148,7 @@ boogey		boogie $text
 boomeranged	bu:m3aNd
 borealis	bo@rI'alIs
 bosun		boUs@n
+bothell         b'0T@L $only
 bourguignonne	bU@gIn'j0n
 boutique	bu:t'i:k
 boutonniere	bu:?n'i@3
@@ -2012,6 +2035,7 @@ geyser		gi:z3
 ?3 geyser	gaIz3
 gi		gi:	$onlys
 gi		$abbrev $allcaps
+gif             g'If
 gig		gIg
 gilead		g'Iliad
 gimme		gImi
@@ -2277,6 +2301,7 @@ irises		aIrIsI#z
 iron		aI3n
 isochronous	aIs'0kr@n@s
 isosceles	aIs'0s@li:z
+issaquah 'Is@kwA:
 ?3 issuance	ISu:@ns
 invalidity	I2nv@lIdI#ti
 
@@ -2330,6 +2355,8 @@ kopje		k0pi
 koran		kO@r'A:n
 kosher		koUS3
 kowtow		kaUt2aU
+kubernetes ,ku:b3'nEti:z
+kusto 'ku:stoU $only
 
 la		,la           $only
 la		$abbrev $allcaps
@@ -2626,6 +2653,7 @@ naif		naI'i:f
 naïve		naI'i:v
 naivete		naI'i:v@teI
 naked		neIkI2#d	// adjective
+nanaimo n@'naImoU $only
 narrative	nar@tIv
 ?3 narrator	nareIt3
 nasa		nasa#
@@ -3016,6 +3044,7 @@ psychosis	saIk'oUsIs
 psychotic	saIk'0tIk
 pud		pUd           // and pudding
 pueblo		pwEbloU
+puget pju:dZIt
 punative	pju:n@tIv
 puny		pju:ni
 purist		pjU@Ist
@@ -3240,6 +3269,7 @@ saliva		s@laIv@
 salmon		sam@n
 ?3 salon	$alt3
 saloon		$alt3
+sammamish s@'m'amIS
 san		,san $only
 sanguine	$alt2
 santoor		$alt3
@@ -3267,6 +3297,7 @@ scenario	s@nA@rioU
 scepter		sEpt3
 sceptre		sEpt3
 ?3 schematic	sk@matIk
+schengen 'SEN@n
 schist		SIst
 sci		saI
 sciatica	saI'atIk@
@@ -3331,6 +3362,7 @@ severest	s@vi@r@st
 shallot		$alt3
 shallow		SaloU
 shampoo		$2
+shaoni	SaI'oUni
 shareable	Se@@b@L
 sharpie		$alt2
 shazam		$alt3
@@ -3384,6 +3416,7 @@ slough		slVf	$verb
 slugabed	slVg@bEd
 snafu		snafu:
 snafus		snafu:z
+snohomish snoU'hoUmIS
 snooker		snu:k3
 sociopath	soUsI@paT
 sofa		soUf@
@@ -3823,6 +3856,7 @@ wholehearted	$2
 wicked		wIkI2#d	// adjective
 width		wItT
 wilderness	wIld3n@s
+willamette wI'lamIt $only
 wifi		waIfaI
 winding		waIndIN       // verb
 wind		waInd         $verb
@@ -4578,6 +4612,7 @@ Deborah		dEb@r@
 Declan		dEkla#n
 Delia		di:li@
 Dimitris	dI#mi:trIs
+Dengler		d'ENgl3
 Denise		d@ni:s
 Dennis		dEnI2s
 Derek		dErIk
@@ -4711,6 +4746,7 @@ Keanu		kI'A:nu:
 Kieran		ki@r@n
 Kris		krIs
 Kristen		krIst@n
+Krzysztof 	krI2stOf
 Laurence	l0r@ns
 Lawrence	l0r@ns
 Leann		li:'an
@@ -5662,5 +5698,3 @@ sterile		$alt2
 tensile		$alt2
 virile		$alt2
 ?3 volatile	v0la#t@L
-
-

@@ -28,191 +28,191 @@
 // precede by _  to distinguish from pronunciation as a language word
 
 // Arabic alphabet
-_آ       alif mamduudah
-_ا       alif
-_ب       baa?
-_پ       pi
-_ت       taa?
-_ث       Taa?
-_ج       dZim
-_ح       Haa?
-_خ       Xaa?
-_د       daal
-_ذ       Daal
-_ر       raa?
-_ز       zaaj
-_س       siin
-_ش       Siin
-_ص       s[aad
-_ض       dHaad
-_ط       t[aa?
-_ظ       Zaa?
-_ع       Aajn
-_غ       gHajn
-_ف       faa?
-_ق       qaaf
-_ك       kaaf
-_گ       gaaf
-_ل       laam
-_م       miim
-_ن       nuun
-_و       waaw
-_ه       haa?
-_ي       jaa?
-_َ       fatHah
-_ُ       dhammah
-_ِ       kasrah
-_ّ       Saddah
-_ْ       sukuun
-_ً       fatHataan
-_ٌ       dhammataan
-_ٍ       kasrataan
-_،       faas[ilah
-_؛       nuqt[atah||faas[lah
-_ـ       tat[wiil
-_ئ       hamzah||Ala||?aljaa?
-_ؤ       hamzah||Ala||?alwaa?
-_إ       hamzah||taHta||?alwaa?
-_أ       ?alif
-_ء       hamzah
-_ة       taa?||marbuut[ah
-_ى       ?alif||maqs[uurah
+_آ       'alif mamd'u:da
+_ا       'alif
+_ب       b'a:?
+_پ       p'a:?
+_ت       t'a:?
+_ث       T'a:?
+_ج       dZ'i:m
+_ح       H'a:?
+_خ       xa:?
+_د       d'a:l
+_ذ       D'a:l
+_ر       R'a.:?
+_ز       z'a:j
+_س       s'i:n
+_ش       S'i:n
+_ص       s['a.:d
+_ض       dH'a.:d
+_ط       t['a.:?
+_ظ       Z'a.:?
+_ع       A-a:jn
+_غ       gH:ajn
+_ف       f'a:?
+_ق       q'a.:f
+_ك       k'a:f
+_گ       g'a:f
+_ل       l'a:m
+_م       m'i:m
+_ن       n'u:n
+_و       w'a:w
+_ه       h'a:?
+_ي       j'a:?
+_َ       f'atHa
+_ُ       dH'a.m:a
+_ِ       k'asRa.
+_ّ       S'ad:a
+_ْ       suk'u:n
+_ً       fatHat'a:n
+_ٌ       dHa.m:at'a:n
+_ٍ       kasRat'a:n
+_،       f'a:s[-ila
+_؛       nuqt[a.||f'a:s[ila
+_ـ       tat[w'i:l
+_ئ       h'amza||A'ala:||?alj'a:?
+_ؤ       h'amza||A'ala:||?alw'a:w
+_إ       h'amza||t'aHta||?al?'alif
+_أ       h'amza||A'ala:?al?'alif
+_ء       h'amza
+_ة       t'a:?||maRb'u:t[a.
+_ى       ?'alif||maqs[-'u:Ra.
 _ةً       tan
 _
 
 // When letters entered one by one
-آ       alif mamduudah              $atend
-ا       alif                        $atend
-ب       baa?                        $atend
-پ       pi                          $atend
-ت       taa?                        $atend
-ث       Taa?                        $atend
-ج       dZim                        $atend
-ح       Haa?                        $atend
-خ       Xaa?                        $atend
-د       daal                        $atend
-ذ       Daal                        $atend
-ر       raa?                        $atend
-ز       zaaj                        $atend
-س       siin                        $atend
-ش       Siin                        $atend
-ص       s[aad                       $atend
-ض       dHaad                       $atend
-ط       t[aa?                       $atend
-ظ       Zaa?                        $atend
-ع       Aajn                        $atend
-غ       gHajn                       $atend
-ف       faa?                        $atend
-ق       qaaf                        $atend
-ك       kaaf                        $atend
-گ       gaaf                        $atend
-ل       laam                        $atend
-م       miim                        $atend
-ن       nuun                        $atend
-و       waaw                        $atend
-ه       haa?                        $atend
-ي       jaa?                        $atend
-َ       fatHah                      $atend
-ُ       dhammah                     $atend
-ِ       kasrah                      $atend
-ّ       Saddah                      $atend
-ْ       sukuun                      $atend
-ً       fatHataan                   $atend
-ٌ       dhammataan                  $atend
-ٍ       kasrataan                   $atend
-،       faas[ilah                   $atend
-؛       nuqt[atah||faas[lah         $atend
-ـ       tat[wiil                    $atend
-ئ       hamzah||Ala||?aljaa?        $atend
-ؤ       hamzah||Ala||?alwaa?        $atend
-إ       hamzah||taHta||?alwaa?      $atend
-أ       ?alif                       $atend
-ء       hamzah                      $atend
-ة       taa?||marbuut[ah            $atend
-ى       ?alif||maqs[uurah           $atend
+آ       'alif mamd'u:da              $atend
+ا       'alif                        $atend
+ب       b'a:?                        $atend
+پ       p'a:?                          $atend
+ت       t'a:?                        $atend
+ث       T'a:?                        $atend
+ج       dZ'i:m                        $atend
+ح       H'a:?                        $atend
+خ       x'a:?                        $atend
+د       d'a:l                        $atend
+ذ       D'a:l                        $atend
+ر       Ra:?                        $atend
+ز       z'a:j                        $atend
+س       s'i:n                        $atend
+ش       S'i:n                        $atend
+ص       s['a.:d                       $atend
+ض       dH'a.:d                       $atend
+ط       t['a.:?                       $atend
+ظ       Z'a.:?                        $atend
+ع       A-a:jn                        $atend
+غ       Q'ajn                       $atend
+ف       f'a:?                        $atend
+ق       q'a.:f                        $atend
+ك       k'a:f                        $atend
+گ       g'a:f                        $atend
+ل       l'a:m                        $atend
+م       m'i:m                        $atend
+ن       n'u:n                        $atend
+و       w'a:w                        $atend
+ه       h'a:?                        $atend
+ي       j'a:?                        $atend
+َ       f'atHa                      $atend
+ُ       dH'a.m:a                     $atend
+ِ       k'asRa                      $atend
+ّ       S'ad:a                      $atend
+ْ       suk'u:n                      $atend
+ً       fatHat'a:n                   $atend
+ٌ       dHa.m:at'a:n                  $atend
+ٍ       kasRat'a:n                   $atend
+،       f'a:s[-ila                   $atend
+؛       nuqt[a.||f'a:s[-ilah         $atend
+ـ       tat[w'i:l                    $atend
+ئ       h'amza||Aala:||?alj'a:?        $atend
+ؤ       h'amza||Aala:||?alw'a:w        $atend
+إ       h'amza||t'aHta||?al?'alif      $atend
+أ       h'amza||A'ala:||?al?'alif                       $atend
+ء       h'amza                      $atend
+ة       t'a:?||marb'u:t[a.            $atend
+ى       ?'alif||maqs[-'u:Rah           $atend
 ةً       tan                         $atend
 
 // numeric
-_0      s[ifr
-_1      waaHid
-_2      ?iTnaan
-_3      TalaaTah
-_4      ?arbaAah
-_5      Xamsah
-_6      sittah
-_7      sabAah
-_8      Tamanijah
-_9      tisAah
-_10     AaSarah
-_11     ?aHada||AaSarah
-_12     ?iTnaa||AaSarah
-_13     TalaaTata||AaSarah
-_14     ?arbaAata||AaSarah
-_15     Xamsata||AaSarah
-_16     sittata||AaSarah
-_17     sabAata||AaSarah
-_18     Tamaanijata||AaSarah
-_19     tisAata||AaSarah
-_2X     AiSruun
-_3X     TalaTuun
-_4X     ?arbaAuun
-_5X     Xamsuun
-_6X     sittuun
-_7X     sabA:n
-_8X     Tamaanuun
-_9X     tisAuun
+_0      s[-'ifR
+_1      w'a:Hid
+_2      ?iTn'a:n
+_3      Tal'a:Ta
+_4      ?'aRbaA-a
+_5      x'amsa
+_6      s'it:a
+_7      s'abA-a
+_8      Tam'a:nija
+_9      t'isA-a
+_10     'A-aSara
+_11     ?'aHada||A-aSaR
+_12     ?'iTn'a:||A-aSaR
+_13     Tal'a:Tata||A-aSaR
+_14     ?arb'aA-ata||A-aSaR
+_15     x'amsata||A-aSaR
+_16     s'it:ata||A-aSaR
+_17     s'abA-ata||A-aSaR
+_18     Tama:n'ijata||A-aSaR
+_19     t'isA-ata||A-aSaR
+_2X     AiSR'u:n
+_3X     Tala:T'u:n
+_4X     ?aRbaA-'u:n
+_5X     xams'u:n
+_6X     sit:'u:n
+_7X     sabA-'u:n
+_8X     Tama:n'u:n
+_9X     tisA-'u:n
 
-_0C     mi?ah
-_1C     mi?ah
-_2C     mi?ataan
-_3C     TalaaTumi?ah
-_4C     ?arbaAumi?ah
-_5C     Xamsumi?ah
-_6C     sittumi?ah
-_7C     sabAumi?ah
-_8C     Tamaanumi?ah
-_9C     tisAumi?ah
+_0C     m'i?a
+_1C     m'i?a
+_2C     mi?at'a:n
+_3C     Tal'a:Tumi?a
+_4C     ?'arbaA-umi?a
+_5C     x'amsumi?a
+_6C     s'it:umi?a
+_7C     s'abA-umi?a
+_8C     Tam'a:numi?a
+_9C     t'isA-umi?a
 
-_0M1    ?alf
-_1M1    ?alf
-_2M1    ?alfaan
-_3M1    TalaaTat||?aalaaf
-_4M1    ?arbaAat||?aalaaf
-_5M1    Xamsat||?aalaaf
-_6M1    sittat||?aalaaf
-_7M1    sabAat||?aalaaf
-_8M1    Tamaanijat||?aalaaf
-_9M1    tisAat||?aalaaf
-_10M1   AaSarat||?aalaaf
+_0M1    ?'alf
+_1M1    ?'alf
+_2M1    ?alf'a:n
+_3M1    Tal'a:Tatu||?a:l'a:f
+_4M1    ?aRb'aA-atu||?a:l'a:f
+_5M1    x'amsatu||?a:l'a:f
+_6M1    s'it:atu||?a:l'a:f
+_7M1    s'abA-atu||?a:l'a:f
+_8M1    Tama:n'ijatu||?a:l'a:f
+_9M1    t'isA-atu||?a:l'a:f
+_10M1   A-aSRatu||?a:l'a:f
 
-_0M2    m%ilj%uun
-_1M2    m%iljuun
-_2M2    miljuunaan
-_3M2    TalaaTat||malaajiin
-_4M2    ?arbaAat||malaajiin
-_5M2    Xamsat||malaajiin
-_6M2    sittat||malaajiin
-_7M2    sabAat||malaajiin
-_8M2    Tamaanijat||malaajiin
-_9M2    tisAat||malaajiin
-_10M2   AaSarat||malaajiin
+_0M2    m%ilj%u:n
+_1M2    m%ilju:n
+_2M2    milju:na:n
+_3M2    Tala:Tat||mala:ji:n
+_4M2    ?arba:at||mala:ji:n
+_5M2    Xamsat||mala:ji:n
+_6M2    sittat||mala:ji:n
+_7M2    sabA:t||mala:ji:n
+_8M2    Tama:nijat||mala:ji:n
+_9M2    tisA:t||mala:ji:n
+_10M2   A:Sarat||mala:ji:n
 
-_0M3    miljaar
-_1M3    miljaar
-_2M3    miljaaraan
-_3M3    TalaaTat||miljaaraat
-_4M3    ?arbaAat||miljaaraat
-_5M3    Xamsat||miljaaraat
-_6M3    sittat||miljaaraat
-_7M3    sabAat||miljaaraat
-_8M3    Tamaanijat||miljaaraat
-_9M3    tisAat||miljaaraat
-_10M3   AaSarat||miljaaraat
+_0M3    milja:r
+_1M3    milja:r
+_2M3    milja:ra:n
+_3M3    Tala:Tat||milja:ra:t
+_4M3    ?arba:at||milja:ra:t
+_5M3    Xamsat||milja:ra:t
+_6M3    sittat||milja:ra:t
+_7M3    sabA:t||milja:ra:t
+_8M3    Tama:nijat||milja:ra:t
+_9M3    tisA:t||milja:ra:t
+_10M3   A:Sarat||milja:ra:t
 
 
 _0and   wa
-_dpt    faas[il
-_roman  rumaanii
+_dpt    fa:s[il
+_roman  ruma:ni:
 
 _#st    om
 _#nd    va
@@ -221,26 +221,26 @@ _#th    om
 
 
 // character names
-÷       taqsiim
-×       fii
-؟       Aalaaamat||?istifhaam
-!       Aalaaamat||taAadZdZub
-$       duulaar
-%       bilmi?ah
-[       AaaridHah||maftuuHah
-]       AaaridHah||mugHlaqah
-(       qaws||maftuuH
-)       qaws||mugHlaq
-*       nedZmah
--       naaqis[
-/.      nuqt[ah
-/:      nuqt[ataan
-<       ?as[gHar||min
-=       tusaawii
->       ?akbar||min
-{       HaadHinah||maftuuHah
-}       HaadHinah||mugHlaqah
-...     TalaaT||niqaat[
+_÷       taqsi:m
+_×       fi:
+_؟       A:la:amat||?istifha:m
+_!       A:la:amat||ta:adZdZub
+_$       du:la:r
+_%       bilmi?ah
+_[       A:ridHah||maftu:Hah
+_]       A:ridHah||mugHlaqah
+_(       qaws||maftu:H
+_)       qaws||mugHlaq
+_*       nedZmah
+_-       na:qis[
+_/.      nuqt[ah
+_/:      nuqt[ata:n
+_<       ?as[gHar||min
+_=       tusa:wi:
+_>       ?akbar||min
+_{       Ha:dHinah||maftu:Hah
+_}       Ha:dHinah||mugHlaqah
+_...     Tala:T||niqa:t[
 
 
 //characters and numbers and words with English alphabet is translated by English phonemes
@@ -250,69 +250,69 @@ th      _^_en
 //*********************
 
 //abbreviations
-د       ?ad'duktuur     $hasdot
-أنا     ?nba?anaa       $hasdot
-اه      ?intahaa        $hasdot
-ثنا     Had'daTanaa     $hasdot
-الخ     ?ila||?aa_Xirih $hasdot
-إلخ     ?ila||?aaXirih  $hasdot
+د       ?ad'duktu:r     $hasdot
+أنا     ?nba?ana:       $hasdot
+اه      ?intaha:        $hasdot
+ثنا     Had'daTana:     $hasdot
+الخ     ?ila||?a:_Xirih $hasdot
+إلخ     ?ila||?a:Xirih  $hasdot
 رحه     raHimahullah    $hasdot
 رضه     radHijallahu||Anhu      $hasdot
 و       wa  $pause
-إله     ?ilaah
-أولئك   ?ulaa?ika
-أولو    ?uluu
-أولي    ?ulii
-داود    daawuud
-ذلك     Daalika
-التي    ?allatii
-الذي    ?allaDii
-الذين   ?allaDiina
+إله     ?ila:h
+أولئك   ?ula:?ika
+أولو    ?ulu:
+أولي    ?uli:
+داود    da:wu:d
+ذلك     Da:lika
+التي    ?allati:
+الذي    ?allaDi:
+الذين   ?allaDi:na
 اللذين  ?allaDajn
-اللذان  ?allaDaani
-صلعم    s[allaa|?allahu|Alajhi||wa||sallam
-الرحمن  ?arraHmaan
-لكن     laakin
-الله    ?allaah
+اللذان  ?allaDa:ni
+صلعم    s[alla:|?allahu|Alajhi||wa||sallam
+الرحمن  ?arraHma:n
+لكن     la:kin
+الله    ?alla:h
 اللهم   ?allahumma
-هؤلاء    haa?ulaa?i
-هذا     haaDaa
-هذان    haaDaani
-هذه     haaDihi
+هؤلاء    ha:?ula:?i
+هذا     ha:Da:
+هذان    ha:Da:ni
+هذه     ha:Dihi
 //الوحدات
-كغ      kiluu||gHraam
-كجم     kiluu||gHraam
-كغم     kiluu||gHraam
+كغ      kilu:||gHra:m
+كجم     kilu:||gHra:m
+كغم     kilu:||gHra:m
 طن      t[un
-كم      kiiluu||mitar
-سا      saaAa
+كم      ki:lu:||mitar
+سا      sa:A:
 // Units below conflict with single letter word
 // م    mitar
-// س    su?aal
-// ج    dZawaab
+// س    su?a:l
+// ج    dZawa:b
 // ص    s[afHah
-د.ج     diinaar||dZazaa?irij
-$       duulaar
-€       ?uurruu
+د.ج     di:na:r||dZaza:?irij
+$       du:la:r
+€       ?u:rru:
 £       dZunajh
-¥       juwaan
-ج.م     juwaan||mis[ri
-ر.س     rijaal||saAuudii
+¥       juwa:n
+ج.م     juwa:n||mis[ri
+ر.س     rija:l||sa:u:di:
 ابن     ?ibn
 بن      ban
 
 //foreign language
-إنجليزية                ?ingliizijah // probelm
-جوجل            guugal
-غوغل            guugal
-(بسم الله)      bismillaah
+إنجليزية                ?ingli:zijah // probelm
+جوجل            gu:gal
+غوغل            gu:gal
+(بسم الله)      bismilla:h
 
 // exceptional words with flags
 ای      ?aj     $only
 
 // exceptional words,  (out of rules)
 // proper nouns
-طه      t[aahaa
-عمرو    Aamr
+طه      t[a:ha:
+عمرو    A:mr
 أنا     'ana
 

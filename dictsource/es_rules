@@ -9,7 +9,7 @@
 .L01 l r y
 .L02 b d g n m         // change [s] to [z] before these
 .L03 f h j r s y z       // allow [B] [D] [Q] before these consonants
-.L04 b v f p      // labials, nasals are [m]
+.L04 b v fl fr p      // labials, nasals are [m]
 .L05 g k          // velars, nasals are [N]
 .L06 j w l r b d g n m p t k c
 
@@ -180,7 +180,7 @@
      _) qw (A      kw        // qwerty
 
 .group rr
-	rr	rr
+	rr	R2
 
 .group r
         r          r
@@ -188,7 +188,7 @@
         r (t       r
      A) r (A       r
      C) r (A       r
-     _) r (A       rr
+     _) r (A       R2
      l) r (A       R2
      m) r (A       R2
      n) r (A       R2
@@ -256,9 +256,9 @@
      _) y ($unpr   J
     _m) y (A       j
     _l) y (A       j
-        y (A       j:
+        y (A       J^
      _) y (A       J^
-     u) y (K       j:
+     u) y (K       j
     n_) y (A       dZ
         y (_       i
 
@@ -277,7 +277,7 @@
         ñ          n^
         $          d'olar
 
-     _) - (_D      m'Enos
+	_) - (D	m'Enos
     A_) - (_D      _
     C_) - (_D      _
 

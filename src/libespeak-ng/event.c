@@ -16,7 +16,7 @@
  * along with this program; if not, see: <http://www.gnu.org/licenses/>.
  */
 
-// This source file is only used for asynchronious modes
+// This source file is only used for asynchronous modes
 
 #include "config.h"
 
@@ -43,9 +43,10 @@ static pthread_cond_t my_cond_stop_is_required;
 static bool my_stop_is_required = false;
 static pthread_cond_t my_cond_stop_is_acknowledged;
 static bool my_stop_is_acknowledged = false;
+static bool my_terminate_is_required = 0;
 // my_thread: polls the audio duration and compares it to the duration of the first event.
 static pthread_t my_thread;
-static bool thread_inited;
+static bool thread_inited = false;
 
 static t_espeak_callback *my_callback = NULL;
 static bool my_event_is_running = false;
@@ -82,9 +83,15 @@ void event_init(void)
 	pthread_mutex_init(&my_mutex, (const pthread_mutexattr_t *)NULL);
 	init();
 
-	assert(-1 != pthread_cond_init(&my_cond_start_is_required, NULL));
-	assert(-1 != pthread_cond_init(&my_cond_stop_is_required, NULL));
-	assert(-1 != pthread_cond_init(&my_cond_stop_is_acknowledged, NULL));
+	int a_status;
+
+	a_status = pthread_cond_init(&my_cond_start_is_required, NULL);
+	assert(-1 != a_status);
+	a_status = pthread_cond_init(&my_cond_stop_is_required, NULL);
+	assert(-1 != a_status);
+	a_status = pthread_cond_init(&my_cond_stop_is_acknowledged, NULL);
+	assert(-1 != a_status);
+	(void)a_status;
 
 	pthread_attr_t a_attrib;
 
@@ -160,7 +167,6 @@ static void event_notify(espeak_EVENT *event)
 				events[0].type = espeakEVENT_SENTENCE;
 				my_callback(NULL, 0, events);
 				events[0].type = a_new_type;
-				usleep(50000);
 			}
 			my_callback(NULL, 0, events);
 			a_old_uid = event->unique_identifier;
@@ -222,7 +228,7 @@ espeak_ng_STATUS event_declare(espeak_EVENT *event)
 	return status;
 }
 
-espeak_ng_STATUS event_clear_all()
+espeak_ng_STATUS event_clear_all(void)
 {
 	espeak_ng_STATUS status;
 	if ((status = pthread_mutex_lock(&my_mutex)) != ENS_OK)
@@ -253,13 +259,13 @@ static void *polling_thread(void *p)
 {
 	(void)p; // unused
 
-	while (1) {
+	while (!my_terminate_is_required) {
 		bool a_stop_is_required = false;
 
 		(void)pthread_mutex_lock(&my_mutex);
 		my_event_is_running = false;
 
-		while (my_start_is_required == false) {
+		while (my_start_is_required == false && my_terminate_is_required == false) {
 			while ((pthread_cond_wait(&my_cond_start_is_required, &my_mutex) == -1) && errno == EINTR)
 				continue; // Restart when interrupted by handler
 		}
@@ -271,7 +277,7 @@ static void *polling_thread(void *p)
 		pthread_mutex_unlock(&my_mutex);
 
 		// In this loop, my_event_is_running = true
-		while (head && (a_stop_is_required == false)) {
+		while (head && (a_stop_is_required == false) && (my_terminate_is_required == false)) {
 			espeak_EVENT *event = (espeak_EVENT *)(head->data);
 			assert(event);
 
@@ -304,7 +310,7 @@ static void *polling_thread(void *p)
 
 		(void)pthread_mutex_unlock(&my_mutex);
 
-		if (a_stop_is_required == true) {
+		if (a_stop_is_required == true || my_terminate_is_required == true) {
 			// no mutex required since the stop command is synchronous
 			// and waiting for my_cond_stop_is_acknowledged
 			init();
@@ -352,7 +358,7 @@ static espeak_ng_STATUS push(void *the_data)
 	return ENS_OK;
 }
 
-static void *pop()
+static void *pop(void)
 {
 	void *the_data = NULL;
 
@@ -373,7 +379,7 @@ static void *pop()
 }
 
 
-static void init()
+static void init(void)
 {
 	while (event_delete((espeak_EVENT *)pop()))
 		;
@@ -381,11 +387,15 @@ static void init()
 	node_counter = 0;
 }
 
-void event_terminate()
+void event_terminate(void)
 {
 	if (thread_inited) {
-		pthread_cancel(my_thread);
+		my_terminate_is_required = true;
+		pthread_cond_signal(&my_cond_start_is_required);
+		pthread_cond_signal(&my_cond_stop_is_required);
 		pthread_join(my_thread, NULL);
+		my_terminate_is_required = false;
+
 		pthread_mutex_destroy(&my_mutex);
 		pthread_cond_destroy(&my_cond_start_is_required);
 		pthread_cond_destroy(&my_cond_stop_is_required);
@@ -404,7 +414,9 @@ void clock_gettime2(struct timespec *ts)
 	if (!ts)
 		return;
 
-	assert(gettimeofday(&tv, NULL) != -1);
+	int a_status = gettimeofday(&tv, NULL);
+	assert(a_status != -1);
+	(void)a_status;
 	ts->tv_sec = tv.tv_sec;
 	ts->tv_nsec = tv.tv_usec*1000;
 }

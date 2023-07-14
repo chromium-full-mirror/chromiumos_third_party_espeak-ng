@@ -122,7 +122,7 @@ class EspeakTtsEngine {
     this.initialized_ = false;
 
     // Initialize the WASM module and call updateVoices when it's ready.
-    this.tts_ = new eSpeakNG('js/espeakng.worker.js', (function() {
+    this.tts_ = new eSpeakNG('js/espeakng_worker.js', (function() {
                                                         // This will call
                                                         // this.finishInitialization_()
                                                         // when done, which will

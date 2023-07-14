@@ -201,7 +201,7 @@ ESPEAK_API int espeak_Initialize(espeak_AUDIO_OUTPUT output, int buflength, cons
 
    buflength:  The length in mS of sound buffers passed to the SynthCallback function.
             Value=0 gives a default of 60mS.
-            This paramater is only used for AUDIO_OUTPUT_RETRIEVAL and AUDIO_OUTPUT_SYNCHRONOUS modes.
+            This parameter is only used for AUDIO_OUTPUT_RETRIEVAL and AUDIO_OUTPUT_SYNCHRONOUS modes.
 
    path: The directory which contains the espeak-ng-data directory, or NULL for the default location.
 
@@ -235,7 +235,7 @@ int SynthCallback(short *wav, int numsamples, espeak_EVENT *events);
       sometimes be zero (which does NOT indicate end of synthesis).
 
    events: an array of espeak_EVENT items which indicate word and sentence events, and
-      also the occurance if <mark> and <audio> elements within the text.  The list of
+      also the occurrence if <mark> and <audio> elements within the text.  The list of
       events is terminated by an event of type = 0.
 
 
@@ -604,6 +604,19 @@ ESPEAK_API const espeak_VOICE **espeak_ListVoices(espeak_VOICE *voice_spec);
    If voice_spec is NULL then all voices are listed.
    If voice spec is given, then only the voices which are compatible with the voice_spec
    are listed, and they are listed in preference order.
+*/
+
+#ifdef __cplusplus
+extern "C"
+#endif
+ESPEAK_API espeak_ERROR espeak_SetVoiceByFile(const char *filename);
+/* Loads a voice given the file path.  Language is not considered.
+   "filename" is a UTF8 string.
+
+   Return: EE_OK: operation achieved
+           EE_BUFFER_FULL: the command can not be buffered;
+             you may try after a while to call the function again.
+	   EE_INTERNAL_ERROR.
 */
 
 #ifdef __cplusplus

@@ -1,11 +1,10 @@
-name Chinese (Mandarin)
+name Chinese (Mandarin, latin as English)
 language cmn
 language zh-cmn
 language zh
 
-translator zh
-phonemes zh
-dictionary zh
+phonemes cmn
+dictionary cmn
 words 1
 pitch 80 118
 

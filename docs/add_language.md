@@ -10,6 +10,8 @@
   - [Language File](#language-file)
   - [Phoneme Definition File](#phoneme-definition-file)
   - [Dictionary Files](#dictionary-files)
+  - [Building Phonemes](#building-phonemes)
+  - [Adding tests](#adding-tests)
 - [Program Code](#program-code)
 - [Compiling Rules File for Debugging](#compiling-rules-file-for-debugging)
 - [Improving a Language](#improving-a-language)
@@ -25,8 +27,9 @@ you should be able to [build](../README.md#building) it.
 
 You also have to understand the language main concepts, be aware of its features,
 and have to have patience and attention to detail.
-Wikipedia is a good source of basic phonetic information, e.g. about [vowels]
-(http://en.wikipedia.org/wiki/Vowel) and [consonants](https://en.wikipedia.org/wiki/Consonant).
+Wikipedia is a good source of basic phonetic information, e.g. about 
+[vowels](http://en.wikipedia.org/wiki/Vowel) and
+[consonants](https://en.wikipedia.org/wiki/Consonant).
 
 In many cases it should be fairly easy to add a rough implementation of
 a new language, hopefully enough to be intelligible. After that it's a
@@ -96,15 +99,15 @@ such as:
 
 To add new language, you have to create or edit following files:
 
-|path/file                     |action  |
-|------------------------------|--------|
-| Makefile.am                  |edit    |
-| phsource/phonemes            |edit    |
-| phsource/ph_french           |create  |
-| dictsource/fr_list           |create  |
-| dictsource/fr_rules          |create  |
-| dictsource/fr_extra          |create (optional) |
-| espeak-ng-data/lang/roa/fr   |create  |
+|path/file                     |action                       |
+|------------------------------|-----------------------------|
+| Makefile.am                  |[edit](#makefileam-file)     |
+| espeak-ng-data/lang/roa/fr   |[create](#language-file)     |
+| phsource/phonemes            |[edit](#phonemes-file)       |
+| phsource/ph_french           |[create](#phoneme-definition-file) (optional) |
+| dictsource/fr_list           |[create](#dictionary-files)  |
+| dictsource/fr_rules          |[create](#dictionary-files)  |
+| dictsource/fr_extra          |create (optional)            |
 
 where:
 
@@ -115,39 +118,31 @@ where:
 
 ### Makefile.am File
 
-`Makefile.am` is build configuration file.
+`Makefile.am` is build configuration file. It should be edited if you add
+new language text-to-phoneme translation rules or set of sounds (phonemes).
+Usually you have to add necessary entries for new language, but may not need if
+you add new dialect for existing language.
 
 Search for configuration of existing languages (e.g. English)
 and add similar lines for your language in following sections.
 E.g. for French:
 
-	phsource/phonemes.stamp: \
-	...
-	  phsource/ph_french \
-	...
-	
 	dictionaries: \
 	...
-	  espeak-ng-data/fr_dict \
+	espeak-ng-data/fr_dict \
 	...
-	
+
 	fr: espeak-ng-data/fr_dict
-	dictsource/fr_extra:
-	  touch dictsource/fr_extra
-	espeak-ng-data/fr_dict: src/espeak-ng phsource/phonemes.stamp dictsource/fr_list dictsource/fr_rules dictsource/fr_extra
-	  cd dictsource && ESPEAK_DATA_PATH=$(PWD) LD_LIBRARY_PATH=../src:${LD_LIBRARY_PATH} ../src/espeak-ng --compile=fr && cd ..
+	espeak-ng-data/fr_dict: dictsource/fr_list dictsource/fr_rules dictsource/fr_extra dictsource/fr_emoji
 	...
 
-Note, that you don't need to add `fr_extra` reference in the last group, if your language doesn't have this file.
+Note, that you don't need to add `fr_extra` or `fr_emoji` reference in the last group, if your language doesn't have this file.
 
-### Phonemes File
+Optionally, if you have [phoneme definition file](#phoneme-definition-file), following line also should be added:
 
-Open file `phsource/phonemes` and add following lines into it,
-to make it call your new, e.g. `ph_french` file:
-
+	phsource/phonemes.stamp: \
 	...
-	phonemetable fr base
-	include ph_french
+	phsource/ph_french \
 	...
 
 ### Language File
@@ -176,39 +171,67 @@ existing language.
 
 Details of the contents of language files are given in [Voices](voices.md).
 
-### Phoneme Definition File
+### Phonemes File
 
-E.g. `phsource/ph_french` is the phoneme definition file for French.
-This contains phoneme definitions for the vowels and consonants which the language uses.
-Usually it will contain mostly vowels. Most consonants will be inherited from the
-common phoneme definitions in the _master phoneme file_: `phsource/phonemes`.
+Open file `phsource/phonemes` and add following lines
 
-You must first decide on the set of phonemes (vowel and consonant
-sounds) for the language. These should be defined in a phoneme
-definition file `ph_french`, where `ph_french` is the name of your
-language. A reference to this file is then included at the end of the
-master phoneme file, `phsource/phonemes`, e.g.:
+1. Set of standard (already defined) phonemes for languge
+
+```
+	...
+	phonemetable fr base
+	...
+```
+  where:
+        _..._ means other existing lines of the configuration file and
+        _base_ is usually is `base1` or code of other (already defined) language:
+
+  * `base` phoneme table contains only definitions of some "control" phonemes
+    such as stress marks and pauses defined in top of the `phonemes` file.
+
+  * `base1` includes `base` and also has basic set of vowels and consonants
+    defined under `phonemetable base1` section in `phonemes` file.
+
+  * `base2` has additional phonemes (mostly diphones) included from `ph_base2` file.
+
+  * Other language e.g. `en` has all phonemes defined in its corresponding phoneme
+    definition file e.g. `phsourc/ph_english` for English language.
+
+2. Optionally, if you have customized phonemes in  [Phoneme Definition File](#phoneme-definition-file),
+   add additional line: to include it:
+
+```
+	...
+	include ph_french
+	...
+```
+For example, if `phsource/phonemes` has following lines:
 
 	phonemetable fr base
 	include ph_french
 
-This example defines a phoneme table `fr` which inherits the
-contents of phoneme table `base`. Its contents are found in the file
-`ph_french`.
+it defines a phoneme table `fr` which inherits phoneme definitions from
+`base` table and adds new definitions or overrides existing
+definitions of `base` phonemes from the `phonemes/ph_french` file.
 
-The `base` phoneme table contains definitions of a basic set of
-consonants, and also some "control" phonemes such as stress marks and
-pauses. These are defined in `phsource/phonemes`. The phoneme table
-for a language will inherit these, or alternatively it may inherit the
-phoneme table of another language which in turn inherits the `base`
-phoneme table.
+### Phoneme Definition File
+
+If you decide to customize definitions of phonemes (vowel and consonant
+sounds) for the language, then you have to create e.g. `phsource/ph_french`
+phoneme definition file for French.
 
 The phonemes file for the language defines those additional phonemes
 which are not inherited (generally the vowels and diphthongs, plus any
 additional consonants that are needed), or phonemes whose definitions
 differ from the inherited version (eg. the redefinition of a consonant).
 
+Usually it will contain mostly vowels. Most consonants will be inherited from the
+common phoneme definitions in the _master phoneme file_: `phsource/phonemes` as
+described in [Phonemes File](#phonemes-file) section above.
+
 Details of phonemes files are given in [Phoneme Tables](phontab.md).
+
+### Building Phonemes
 
 To build the phoneme files, run:
 
@@ -262,6 +285,38 @@ or by:
 
 	make fr
 
+### Adding tests
+
+All languages require automated tests to make sure accidental changes 
+in program code don't change how the languages sound. 
+
+Tests are run with `make check`. It will print an error if a language
+is missing tests.
+
+Most tests are bash scripts in tests/ and follow the syntax:
+<test name> <language code> <expected result> <input>
+
+Depending on the test, expected result can be a phoneme string, an md5 hash or something else.
+
+To add a test:
+
+1. First add a test line with arbitrary expected result. 
+Example line in tests/language-phonemes.test:
+test_phwav fi this_should_fail "ma na Na pa ba ta da"
+
+2. run `make check` to see expected and actual results:
+testing fi
+1c1
+< this_should_fail
+---
+> 7541590a29e2392b827d9f1563e6579774fb15ea
+
+3. change the expected result in the test:
+test_phwav fi 7541590a29e2392b827d9f1563e6579774fb15ea "ma na Na pa ba ta da"
+
+
+
+
 ## Program Code
 
 The behaviour of the eSpeak program is controlled by various options
@@ -286,7 +341,7 @@ if language is compiled with `--compile-debug` option.
 To do this, go to `espeak-ng` project root folder, then:
 
 	cd dictsource
-	../src/espeak-ng --compile-debug=en
+	espeak-ng --compile-debug=en
 
 When invoked in following way:
 

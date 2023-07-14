@@ -21,13 +21,15 @@
 #ifndef ESPEAK_NG_SYNTHDATA_H
 #define ESPEAK_NG_SYNTHDATA_H
 
-#include "synthesize.h"
-#include "translate.h"
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+#include "espeak-ng/espeak_ng.h"       // for espeak_ng_ERROR_CONTEXT, espea...
+#include "phoneme.h"                   // for PHONEME_TAB
+#include "synthesize.h"                // for PHONEME_DATA, PHONEME_LIST
+#include "translate.h"                 // for Translator
 
 void InterpretPhoneme(Translator *tr,
 		int control,
@@ -39,9 +41,8 @@ void InterpretPhoneme2(int phcode,
 		PHONEME_DATA *phdata);
 
 void FreePhData(void);
-unsigned char *GetEnvelope(int index);
+const unsigned char *GetEnvelope(int index);
 espeak_ng_STATUS LoadPhData(int *srate, espeak_ng_ERROR_CONTEXT *context);
-void LoadConfig(void);
 int LookupPhonemeString(const char *string);
 int LookupPhonemeTable(const char *name);
 frameref_t *LookupSpect(PHONEME_TAB *this_ph,
@@ -50,10 +51,12 @@ frameref_t *LookupSpect(PHONEME_TAB *this_ph,
 		int *n_frames,
 		PHONEME_LIST *plist);
 
-int NumInstnWords(unsigned short *prog);
 int PhonemeCode(unsigned int mnem);
 void SelectPhonemeTable(int number);
 int  SelectPhonemeTableName(const char *name);
+
+extern int n_tunes;
+extern TUNE *tunes;
 
 #ifdef __cplusplus
 }

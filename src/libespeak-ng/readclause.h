@@ -34,12 +34,9 @@ typedef struct {
 
 extern PARAM_STACK param_stack[];
 
- int clause_type_from_codepoint(uint32_t c);
-int towlower2(unsigned int c, Translator *translator); // Supports Turkish I
+int clause_type_from_codepoint(uint32_t c);
 int Eof(void);
-const char *WordToString2(unsigned int word);
-int Read4Bytes(FILE *f);
-int LoadSoundFile2(const char *fname);
+const char *WordToString2(char buf[5], unsigned int word);
 int AddNameData(const char *name,
                 int wide);
 int ReadClause(Translator *tr,
@@ -49,6 +46,7 @@ int ReadClause(Translator *tr,
 		int n_buf,
 		int *tone_type,
 		char *voice_change);
+
 
 
 
