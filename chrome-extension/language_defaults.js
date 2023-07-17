@@ -19,10 +19,8 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "roa/fr-BE":  // French (Belgium)
     case "roa/fr-CH":  // French (Switzerland)
     case "roa/fr":  // French (France)
-    case "roa/es":  // Spanish (Spain)
     case "roa/es-419":  // Spanish (Latin America)
     case "roa/pt":  // Portuguese (Portugal)
-    case "roa/pt-BR":  // Portuguese (Brazil)
     case "gmw/en-029":  // English (Caribbean)
     case "gmw/en":  // English (Great Britain)
     case "gmw/en-GB-scotland":  // English (Scotland)
@@ -75,7 +73,6 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "inc/sd":  // Sindhi
     case "inc/si":  // Sinhala
     case "ine/sq":  // Albanian
-    case "gmq/sv":  // Swedish
     case "bnt/tn":  // Setswana
     case "trk/tt":  // Tatar
     case "inc/ur":  // Urdu
@@ -116,12 +113,15 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
     case "gmq/nb":  // Norwegian Bokmål
     case "ira/fa":  // Persian
     case "zlw/pl":  // Polish
+    case "roa/pt-BR":  // Portuguese (Brazil)
     case "roa/ro":  // Romanian
     case "zle/ru":  // Russian
     case "zls/sr":  // Serbian
     case "zlw/sk":  // Slovak
     case "zls/sl":  // Slovenian
+    case "roa/es":  // Spanish (Spain)
     case "bnt/sw":  // Swahili
+    case "gmq/sv":  // Swedish
     case "dra/ta":  // Tamil
     case "dra/te":  // Telugu
     case "trk/tr":  // Turkish
