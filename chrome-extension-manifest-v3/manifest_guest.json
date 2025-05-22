@@ -1,0 +1,25 @@
+{
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA36W8SM0fWp0X6HBEnP9rHwONb2j1IYVKcyoPlFVYc44v1NLTtxbau5Cd6rPDULSvmeuClKfKYmThHT5OvxOpUbQJD15Z0zKcQnrZENNeNL0FE6T44g4ONdFQR9Yi3v+yD/emnTyTnvPMSGeCZYkYR3zfgF9A/+ASl2xAVexwjxTIS42Y0rpj9IEMBvDiwpt6lP5AfJRa0kpq+wvHcnVdVZhQcdURggMS7a3llzG2MTRXRpXxuWMcZfqtZbsskV5dCk3o847fgbIJM3mjs/+RJN6ug6dTuBndGHvzFpsJFP6mZ+9/kIsbI/vEyatvFU40iCuIr8DxXtByeyZJLa3rzQIDAQAB",
+  "name": "eSpeakNG text-to-speech extension",
+  "manifest_version": 2,
+  "version": "1.49.3.0",
+  "options_page": "options.html",
+  "background": {
+    "scripts": [
+      "language_defaults.js",
+      "js/espeakng.js",
+      "espeak_tts_engine.js"
+    ]
+  },
+  "permissions": [
+    "storage",
+    "ttsEngine"
+  ],
+  "description": "A free text-to-speech engine that supports many languages.",
+  "tts_engine": {
+    "voices": [
+    ]
+  },
+  "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self'",
+  "incognito": "split"
+}

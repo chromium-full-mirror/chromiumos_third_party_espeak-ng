@@ -1,0 +1,109 @@
+/* Copyright 2018 The Chromium Authors. All rights reserved.
+ * Use of this source code is governed by a GPL license that can be
+ * found in the LICENSE file. */
+
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+
+body {
+    margin: 0 0 20px 0;
+    padding: 0;
+}
+
+body,
+button,
+input,
+select {
+    background-color: rgb(241, 241, 241);
+    font-family: Roboto;
+}
+
+h1 {
+    background: rgb(217, 27, 27);
+    color: white;
+    display: block;
+    font-size: 16px;
+    height: 56px;
+    line-height: 56px;
+    text-align: center;
+    width: 100%;
+}
+
+h2 {
+    color: rgb(97, 97, 97);
+    font-size: 13px;
+    height: 15px;
+    margin-top: 21px;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+    width: 646px;
+}
+
+.option {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    font-size: 13px;
+    line-height: 60px;
+    min-height: 60px;
+    padding: 0 20px;
+    vertical-align: middle;
+    width: 646px;
+}
+
+.option input[type='checkbox'] {
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: url(unchecked.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    border: 0;
+    float: right;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    width: 59px;
+}
+
+.option input[type='checkbox']:checked {
+    background-image: url(checked.png);
+}
+
+.option input[type='checkbox']:focus {
+    background-image: url(unchecked-focused.png);
+}
+
+.option input[type='checkbox']:checked:focus {
+    background-image: url(checked-focused.png);
+}
+
+.option select {
+    background-color: #fff;
+    border-color: #ddd;
+    border-width: 0 0 1px 0;
+    height: 20px;
+    line-height: 60px;
+    margin: 20px 0;
+    padding: 0;
+}
+
+.option input {
+    background-color: #fff;
+    border-color: #ddd;
+    border-width: 0 0 2px 0;
+    outline: none;
+}
+
+.option input:focus {
+    border-color: rgb(0, 0, 255);
+}
+
+.option button {
+    background-color: #ddd;
+    border-width: 0;
+    font-weight: bold;
+    height: 30px;
+    margin-left: 20px;
+    padding: 0 20px;
+}
