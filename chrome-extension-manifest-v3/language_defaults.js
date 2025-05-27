@@ -129,15 +129,14 @@ function isEspeakLanguageEnabledByDefault(espeakLangInfo) {
       return true;
   }
 
-  console.error('Language ' + espeakLangInfo.identifier +
-          ' (' + espeakLangInfo.name + ') should be handled ' +
-          'in switch.');
+  console.error(`Language ${espeakLangInfo.identifier} (${
+      espeakLangInfo.name}) should be handled in switch.`);
 }
 
 function isEspeakLanguageEnabled(langInfo, callback) {
-  var defaultValue = isEspeakLanguageEnabledByDefault(langInfo);
+  const defaultValue = isEspeakLanguageEnabledByDefault(langInfo);
 
-  var key = 'lang-enabled-' + langInfo.identifier;
+  const key = `lang-enabled-${langInfo.identifier}`;
   chrome.storage.local.get(key, (function(result) {
     callback(result[key] !== undefined ? result[key] : defaultValue);
   }).bind(this));

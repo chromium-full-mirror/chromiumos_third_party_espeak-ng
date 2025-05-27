@@ -15,7 +15,7 @@ function $(id) {
 /**
  * @constructor
  */
-var EspeakTtsOptions = function() {
+let EspeakTtsOptions = function() {
   chrome.runtime
       .getContexts({
         contextTypes: ['OFFSCREEN_DOCUMENT'],
@@ -40,16 +40,16 @@ var EspeakTtsOptions = function() {
 
 EspeakTtsOptions.prototype.init = function() {
   this.langInfoArray_.forEach((function(langInfo) {
-                                var row = document.createElement('div');
+                                let row = document.createElement('div');
                                 row.className = 'option';
-                                var label = document.createElement('label');
+                                let label = document.createElement('label');
                                 row.appendChild(label);
-                                var checkbox = document.createElement('input');
+                                let checkbox = document.createElement('input');
                                 checkbox.id = langInfo.identifier;
                                 checkbox.type = 'checkbox';
                                 checkbox.className = 'checkbox pref';
                                 label.appendChild(checkbox);
-                                var text = document.createElement('span');
+                                let text = document.createElement('span');
                                 text.innerText = langInfo.name;
                                 label.appendChild(text);
                                 $('languages').appendChild(row);
@@ -68,18 +68,18 @@ EspeakTtsOptions.prototype.update = function() {
   this.langInfoArray_.forEach((function(langInfo) {
                                 isEspeakLanguageEnabled(
                                     langInfo, function(enabled) {
-                                      var key = langInfo.identifier;
+                                      let key = langInfo.identifier;
                                       $(key).checked = enabled;
                                     });
                               }).bind(this));
 };
 
 EspeakTtsOptions.prototype.onChange = function(event) {
-  var target = event.target;
+  const target = event.target;
   if (target.tagName != 'INPUT' || target.className != 'checkbox pref') return;
 
-  var obj = {};
-  var key = 'lang-enabled-' + target.id;
+  let obj = {};
+  const key = `lang-enabled-${target.id}`;
   obj[key] = target.checked;
   chrome.storage.local.set(obj);
   console.log('updating voices');
@@ -99,16 +99,16 @@ EspeakTtsOptions.prototype.ensureLastVoiceUnremovable = function() {
 };
 
 function addTranslatedMessagesToDom() {
-  var elts = root.querySelectorAll('*[msgid]');
-  for (var i = 0; i < elts.length; i++) {
-    var msgid = elts[i].getAttribute('msgid');
+  let elts = root.querySelectorAll('*[msgid]');
+  for (let i = 0; i < elts.length; i++) {
+    const msgid = elts[i].getAttribute('msgid');
     if (!msgid) {
-      throw new Error('Element has no msgid attribute: ' + elts[i]);
+      throw new Error(`Element has no msgid attribute: ${elts[i]}`);
     }
     elts[i].textContent = chrome.i18n.getMessage(msgid);
   }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  var options = new EspeakTtsOptions();
+  const options = new EspeakTtsOptions();
 }, false);

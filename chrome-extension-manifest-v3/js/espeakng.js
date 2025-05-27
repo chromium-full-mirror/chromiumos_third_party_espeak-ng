@@ -32,7 +32,7 @@ function eSpeakNG(worker_path, ready_cb) {
 }
 
 eSpeakNG.prototype.handleEvent = function (evt) {
-  var callback = evt.data.callback;
+  const callback = evt.data.callback;
   if (callback && this[callback]) {
     this[callback].apply(this, evt.data.result);
     if (evt.data.done) {
@@ -44,13 +44,13 @@ eSpeakNG.prototype.handleEvent = function (evt) {
 
 function _createAsyncMethod(method) {
   return function() {
-    var lastArg = arguments[arguments.length - 1];
-    var message = {
+    const lastArg = arguments[arguments.length - 1];
+    let message = {
       method: method,
       args: Array.prototype.slice.call(arguments, 0)
     };
     if (typeof lastArg == 'function') {
-      var callback = '_' + method +
+      const callback = '_' + method +
           '_' + Math.random().toString().substring(2) +'_cb';
       this[callback] = lastArg;
       message.args.pop();
@@ -60,7 +60,7 @@ function _createAsyncMethod(method) {
   };
 }
 
-for (var method of [
+for (let method of [
     'list_voices',
     'get_rate',
     'get_pitch',

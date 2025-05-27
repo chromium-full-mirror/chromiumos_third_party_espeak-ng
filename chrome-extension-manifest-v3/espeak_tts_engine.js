@@ -168,7 +168,7 @@ class EspeakTtsEngine {
         (function(langInfoArray) {
           this.langInfoArray_ = langInfoArray;
           // Remove Japanese because the voice cannot pronounce many characters.
-          for (var i = 0; i < this.langInfoArray_.length; ++i) {
+          for (let i = 0; i < this.langInfoArray_.length; ++i) {
             if (this.langInfoArray_[i].identifier === 'jpx/ja') {
               this.langInfoArray_.splice(i, 1);
               break;
@@ -183,8 +183,8 @@ class EspeakTtsEngine {
                     langInfo,
                     (function(enabled) {
                       if (enabled) {
-                        var voiceName = 'eSpeak ' + langInfo.name;
-                        var ttsEngineApiVoice = {
+                        let voiceName = 'eSpeak ' + langInfo.name;
+                        let ttsEngineApiVoice = {
                           voiceName: voiceName,
                           lang: langInfo.languages[0].name,
                           remote: false,
@@ -193,7 +193,7 @@ class EspeakTtsEngine {
                         };
                         this.ttsEngineApiVoices_.push(ttsEngineApiVoice);
 
-                        var internalVoiceInfo = {
+                        let internalVoiceInfo = {
                           voiceName: voiceName,
                           espeakVoiceName: langInfo.name,
                           languages: langInfo.languages
@@ -228,7 +228,7 @@ class EspeakTtsEngine {
   finishUpdatingVoices_() {
     console.log('finishUpdatingVoices_');
     chrome.ttsEngine.updateVoices(this.ttsEngineApiVoices_);
-    console.log('Loaded ' + this.ttsEngineApiVoices_.length + ' voices');
+    console.log(`Loaded ${this.ttsEngineApiVoices_.length} voices`);
 
     this.defaultEspeakVoiceName_ =
         this.getBestEspeakVoice('', navigator.language);
@@ -274,7 +274,7 @@ class EspeakTtsEngine {
    * engine.
    */
   onSpeak(utterance, options, audioStreamOptions, callback) {
-    console.log('Will speak: "' + utterance + '" lang="' + options.lang + '"');
+    console.log(`Will speak: "${utterance}" lang="${options.lang}"`);
     this.utteranceId_++;
     this.pendingCallback_ = null;
 
@@ -291,7 +291,7 @@ class EspeakTtsEngine {
     this.sampleRate_ = audioStreamOptions.sampleRate;
     this.bufferSize_ = audioStreamOptions.bufferSize;
 
-    var espeakVoiceName =
+    const espeakVoiceName =
         this.getBestEspeakVoice(options.voiceName, options.lang);
     this.tts_.set_voice(espeakVoiceName);
 
@@ -299,16 +299,15 @@ class EspeakTtsEngine {
 
     // Chrome TTS rates range from 0.1 to 10.0, with 1.0 as the default.
     // eSpeak rates range from 80 to 450, with 175 as the default.
-    var rate = Math.min(Math.max(Math.floor(options.rate * 175), 80), 450);
+    const rate = Math.min(Math.max(Math.floor(options.rate * 175), 80), 450);
     this.tts_.set_rate(rate);
 
     // Chrome TTS pitches range from 0.0 to 2.0, with 1.0 as the default.
     // eSpeak pitches range from 0 to 99, with 50 as the default.
-    var pitch = Math.min(Math.max(Math.floor(options.pitch * 50), 0), 99);
+    const pitch = Math.min(Math.max(Math.floor(options.pitch * 50), 0), 99);
     this.tts_.set_pitch(pitch);
 
-    var handleEvents =
-        function(utteranceId, samples, events) {
+    const handleEvents = function(utteranceId, samples, events) {
       if (this.utteranceId_ != utteranceId) {
         return;
       }
@@ -330,7 +329,7 @@ class EspeakTtsEngine {
           }
         }
       }
-      var sampleArray = new Float32Array(samples);
+      const sampleArray = new Float32Array(samples);
       this.processSamples(sampleArray, charIndex, isEnd);
     }
 
@@ -345,9 +344,9 @@ class EspeakTtsEngine {
    * 'en-US', 'en-GB', etc.
    */
   getBestEspeakVoice(desiredVoiceName, desiredLang) {
-    var exactMatchEspeakVoiceName = null;
-    var langMatchEspeakVoiceName = null;
-    var langMatch = '';
+    let exactMatchEspeakVoiceName = null;
+    let langMatchEspeakVoiceName = null;
+    let langMatch = '';
     this.internalVoiceInfos_.forEach(
         (function(voice) {
           if (desiredVoiceName == voice.voiceName)
@@ -382,12 +381,12 @@ class EspeakTtsEngine {
       return;
     }
 
-    var i = 0;
-    var len = samples.length;
+    let i = 0;
+    const len = samples.length;
 
-    var didSendBuffers = false;
+    let didSendBuffers = false;
     while (i < len) {
-      var chunkLen =
+      const chunkLen =
           Math.min(this.bufferSize_ - this.currentBufferIndex_, len - i);
       if (!this.currentBuffer_) {
         this.currentBuffer_ = new Float32Array(this.bufferSize_);
