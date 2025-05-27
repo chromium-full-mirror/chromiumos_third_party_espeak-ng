@@ -2,6 +2,12 @@
 // Use of this source code is governed by a the GPL license that can be
 // found in the LICENSE file.
 
+try {
+  importScripts('./constants.js');
+} catch (e) {
+  console.error('Error importing scripts: ', e);
+}
+
 /**
  * @fileoverview eSpeak text-to-speech extension.
  *
@@ -419,15 +425,83 @@ class EspeakTtsEngine {
   }
 }
 
-// In 'split' manifest mode, the extension system runs two copies of the
-// extension. One in an incognito context; the other not. In guest mode, the
-// extension system runs only the extension in an incognito context. To prevent
-// doubling of this extension, only continue for one context.
-const manifest =
-    /** @type {{incognito: (string|undefined)}} */ (
-        chrome.runtime.getManifest());
-if (manifest.incognito == 'split' && !chrome.extension.inIncognitoContext) {
-  window.close();
-} else {
-  window.engine = new EspeakTtsEngine();
+/**
+ * Creates a new offscreen document if one doesn't already exist. If it does,
+ * this function results in a no-op.
+ *
+ * @return {array!} Returns an array of ExtensionContexts objects. The array can
+ *     be empty if the offscreen document failed to initialize.
+ */
+async function maybeSetupOffscreenDocument() {
+  try {
+    // Check if an offscreen document is already active, and return it.
+    let existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)]
+    });
+
+    if (existingContexts.length > 0) {
+      return existingContexts;
+    }
+
+    // Otherwise, create a new offscreen document, and return that instead.
+    await chrome.offscreen.createDocument({
+      url: OFFSCREEN_DOCUMENT_PATH,
+      reasons: [chrome.offscreen.Reason.WORKERS],
+      justification:
+          'Main page which handles communication between Extension Service Worker and eSpeakNG Dedicated Worker.',
+    });
+
+    existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)]
+    });
+
+    return existingContexts;
+  } catch (e) {
+    console.error('Could not create offscreen document: ', e);
+    return [];
+  }
 }
+
+/**
+ * Creates a new EspeakTTSEngine, and then stores it in an offscreen page which
+ * will be used by the options.html page.
+ */
+async function init() {
+  // In 'split' manifest mode, the extension system runs two copies of the
+  // extension. One in an incognito context; the other not. In guest mode, the
+  // extension system runs only the extension in an incognito context. To
+  // prevent doubling of this extension, only continue for one context.
+  const manifest =
+      /** @type {{incognito: (string|undefined)}} */ (
+          chrome.runtime.getManifest());
+  if (manifest.incognito !== 'split' || chrome.extension.inIncognitoContext) {
+    // Create an offscreen document if needed. This will be used to store the
+    // engine.
+    const existingContexts = await maybeSetupOffscreenDocument();
+
+    if (existingContexts.length === 0) {
+      console.error(
+          'Failed to create offscreen page, so Espeak TTS engine cannot be initialized.');
+      return;
+    }
+
+    // Initialize the engine, and store it in the offscreen page for options.js.
+    if (existingContexts[0].engine == null) {
+      // TODO(b/419896366): Storing it doesn't work due to process boundry. Instead, we
+      // need to expose the EspeakTTSEngine() function calls via message passing
+      // api.
+      existingContexts[0].engine = new EspeakTtsEngine();
+
+      // TODO(b/419881642): Tune the lifetime later.
+      // Keep this instance alive indefinitely.
+      setInterval(chrome.runtime.getPlatformInfo, 25 * 1000);
+    }
+  } else {
+    // Do nothing and let the system automatically end this service worker.
+  }
+}
+
+// Create the TTSEngine in the Chrome Extension.
+init();

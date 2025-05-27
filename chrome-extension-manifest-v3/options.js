@@ -16,14 +16,27 @@ function $(id) {
  * @constructor
  */
 var EspeakTtsOptions = function() {
-  chrome.runtime.getBackgroundPage((background) => {
-    this.engine_ = background.engine;
-    this.engine_.getLangInfoArray((langInfoArray) => {
-      this.langInfoArray_ = langInfoArray;
-      this.init();
-    });
-  });
+  chrome.runtime
+      .getContexts({
+        contextTypes: ['OFFSCREEN_DOCUMENT'],
+        documentUrls: [chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)]
+      })
+      .then((existingContexts) => {
+        if (existingContexts.length > 0) {
+          this.engine_ = existingContexts[0].engine;
+          this.engine_.getLangInfoArray((langInfoArray) => {
+            this.langInfoArray_ = langInfoArray;
+            this.init();
+          });
+        } else {
+          console.error('No existing context found.');
+        }
+      })
+      .catch((e) => {
+        console.error('Could not get contexts: ', e);
+      });
 };
+
 
 EspeakTtsOptions.prototype.init = function() {
   this.langInfoArray_.forEach((function(langInfo) {
