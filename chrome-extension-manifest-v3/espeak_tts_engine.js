@@ -267,13 +267,16 @@ class EspeakTtsEngine {
    * Called by the client to start speech synthesis.
    *
    * @param {string} utterance The utterance to say.
-   * @param {object} options The options affecting the speech, like language,
+   * @param {object!} options The options affecting the speech, like language,
    *   pitch, rate, etc.
-   * @param {function(object)} callback The function to receive messages from
-   *     the
-   * engine.
+   * @param {object?} audioStreamOptions Various voice settings, such as sampleRate or
+   *     bufferSize.
+   * @param {function(object?)} sendTtsAudio The function to receive messages from
+   *     the engine.
+   * @param {function(string)} sendError The function to receive error messages
+   *     from the engine.
    */
-  onSpeak(utterance, options, audioStreamOptions, callback) {
+  onSpeak(utterance, options, audioStreamOptions, sendTtsAudio, sendError) {
     console.log(`Will speak: "${utterance}" lang="${options.lang}"`);
     this.utteranceId_++;
     this.pendingCallback_ = null;
@@ -285,7 +288,7 @@ class EspeakTtsEngine {
       return;
     }
 
-    this.ttsEngineApiCallback_ = callback;
+    this.ttsEngineApiCallback_ = sendTtsAudio;
     this.utterance_ = utterance;
 
     this.sampleRate_ = audioStreamOptions.sampleRate;
@@ -425,6 +428,44 @@ class EspeakTtsEngine {
 }
 
 /**
+ * Tracks when a service worker was last alive and extends the service worker
+ * lifetime by writing the current time to extension storage every 20 seconds.
+ * You should still prepare for unexpected termination - for example, if the
+ * extension process crashes or your extension is manually stopped at
+ * chrome://serviceworker-internals.
+ */
+let heartbeatInterval;
+
+/**
+ * Writes to storage to keep the service worker alive (prevents system from
+ * cleaning up this service worker).
+ */
+async function runHeartbeat() {
+  await chrome.storage.local.set({ 'last-heartbeat': new Date().getTime() });
+}
+
+/**
+ * Starts the heartbeat interval which keeps the service worker alive. Call
+ * this sparingly when you are doing work which requires persistence, and call
+ * stopHeartbeat once that work is complete.
+ */
+async function startHeartbeat() {
+  // Run the heartbeat once at service worker startup.
+  runHeartbeat().then(() => {
+    // Then again every 20 seconds.
+    heartbeatInterval = setInterval(runHeartbeat, 20 * 1000);
+  });
+}
+
+/**
+ * Stops the heartbeat which means that the system will clean up the service
+ * worker after 30 seconds of inactivity.
+ */
+async function stopHeartbeat() {
+  clearInterval(heartbeatInterval);
+}
+
+/**
  * Creates a new offscreen document if one doesn't already exist. If it does,
  * this function results in a no-op.
  *
@@ -495,7 +536,7 @@ async function init() {
 
       // TODO(b/419881642): Tune the lifetime later.
       // Keep this instance alive indefinitely.
-      setInterval(chrome.runtime.getPlatformInfo, 25 * 1000);
+      startHeartbeat();
     }
   } else {
     // Do nothing and let the system automatically end this service worker.
