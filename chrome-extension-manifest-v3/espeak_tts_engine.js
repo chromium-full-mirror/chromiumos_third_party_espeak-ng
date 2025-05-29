@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 try {
-  importScripts('./constants.js');
+  importScripts('./constants.js', './language_defaults.js');
 } catch (e) {
   console.error('Error importing scripts: ', e);
 }
@@ -127,15 +127,39 @@ class EspeakTtsEngine {
      */
     this.initialized_ = false;
 
-    // Initialize the WASM module and call updateVoices when it's ready.
-    this.tts_ = new eSpeakNG('js/espeakng_worker.js', (function() {
-                                                        // This will call
-                                                        // this.finishInitialization_()
-                                                        // when done, which will
-                                                        // initialize the audio
-                                                        // worklet.
-                                                        this.updateVoices();
-                                                      }).bind(this));
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request == null || request.type == null) {
+        console.error('Malformed request: ', request, 'from: ', sender);
+        return;
+      }
+      switch (request.type) {
+        case 'wasm-worker-initialized':
+          this.updateVoices();
+          break;
+        default:
+          console.error(`Unknown type: ${request.type}`);
+          break;
+      }
+    });
+
+    // Service workers (like this one), cannot spawn dedicated workers.
+    // Call the offscreen page to create an instance of dedicated worker for
+    // this service worker to use.
+    maybeSetupOffscreenDocument().then((contexts) => {
+      if (contexts.length > 0) {
+        chrome.runtime.sendMessage({type: 'create-wasm-worker'}, (response) => {
+          switch (response.type) {
+            case 'create-wasm-worker-success':
+              break;
+            case 'create-wasm-worker-failure':
+            default:
+              throw new Error(`Dispatched 'create-wasm-worker' and received: ${
+                  response.type}`);
+              break;
+          }
+        });
+      }
+    });
 
     // Start listening to chrome.ttsEngine requests.
     chrome.ttsEngine.onSpeakWithAudioStream.addListener(
@@ -164,8 +188,9 @@ class EspeakTtsEngine {
    */
   updateVoices() {
     console.log('updateVoices');
-    this.tts_.list_voices(
-        (function(langInfoArray) {
+    chrome.runtime.sendMessage(
+        {type: 'list_voices'},
+        ((langInfoArray) => {
           this.langInfoArray_ = langInfoArray;
           // Remove Japanese because the voice cannot pronounce many characters.
           for (let i = 0; i < this.langInfoArray_.length; ++i) {
