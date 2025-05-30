@@ -40,7 +40,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // If the request is a creation request, honor that first.
   if (request.type === 'create-wasm-worker') {
-    sendResponse({type: `create-wasm-worker-${createWasmWorker() ? 'success' : 'failure'}`});
+    sendResponse({
+      type: `create-wasm-worker-${createWasmWorker() ? 'success' : 'failure'}`
+    });
     return;
   }
 
@@ -63,6 +65,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       // Return to indicate that the response is being sent asynchronously.
       return true;
+    case 'set_voice':
+      (async () => {
+        await tts_.set_voice(request.voiceName);
+      })();
+      return;
+    case 'set_system_sample_rate':
+      (async () => {
+        await tts_.set_systemSampleRate(request.sampleRate);
+      })();
+      return;
+    case 'set_rate':
+      (async () => {
+        await tts_.set_rate(request.rate);
+      })();
+      return;
+    case 'set_pitch':
+      (async () => {
+        await tts_.set_pitch(request.pitch);
+      })();
+      return;
     default:
       console.error(`Unknown type: ${request.type}`);
       break;

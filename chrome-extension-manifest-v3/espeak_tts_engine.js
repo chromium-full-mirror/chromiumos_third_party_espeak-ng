@@ -153,8 +153,9 @@ class EspeakTtsEngine {
               break;
             case 'create-wasm-worker-failure':
             default:
-              throw new Error(`Dispatched 'create-wasm-worker' and received: ${
-                  response.type}`);
+              throw new Error(
+                  "Dispatched 'create-wasm-worker' and received: " +
+                  `${response.type}`);
               break;
           }
         });
@@ -321,19 +322,20 @@ class EspeakTtsEngine {
 
     const espeakVoiceName =
         this.getBestEspeakVoice(options.voiceName, options.lang);
-    this.tts_.set_voice(espeakVoiceName);
+    chrome.runtime.sendMessage({type: 'set_voice', voiceName: espeakVoiceName});
 
-    this.tts_.set_systemSampleRate(this.sampleRate_);
+    chrome.runtime.sendMessage(
+        {type: 'set_system_sample_rate', sampleRate: this.sampleRate_});
 
     // Chrome TTS rates range from 0.1 to 10.0, with 1.0 as the default.
     // eSpeak rates range from 80 to 450, with 175 as the default.
     const rate = Math.min(Math.max(Math.floor(options.rate * 175), 80), 450);
-    this.tts_.set_rate(rate);
+    chrome.runtime.sendMessage({type: 'set_rate', rate: rate});
 
     // Chrome TTS pitches range from 0.0 to 2.0, with 1.0 as the default.
     // eSpeak pitches range from 0 to 99, with 50 as the default.
     const pitch = Math.min(Math.max(Math.floor(options.pitch * 50), 0), 99);
-    this.tts_.set_pitch(pitch);
+    chrome.runtime.sendMessage({type: 'set_pitch', pitch: pitch});
 
     const handleEvents = function(utteranceId, samples, events) {
       if (this.utteranceId_ != utteranceId) {
