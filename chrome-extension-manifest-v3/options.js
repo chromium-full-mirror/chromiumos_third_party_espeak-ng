@@ -16,27 +16,12 @@ function $(id) {
  * @constructor
  */
 let EspeakTtsOptions = function() {
-  chrome.runtime
-      .getContexts({
-        contextTypes: ['OFFSCREEN_DOCUMENT'],
-        documentUrls: [chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)]
-      })
-      .then((existingContexts) => {
-        if (existingContexts.length > 0) {
-          this.engine_ = existingContexts[0].engine;
-          this.engine_.getLangInfoArray((langInfoArray) => {
-            this.langInfoArray_ = langInfoArray;
-            this.init();
-          });
-        } else {
-          console.error('No existing context found.');
-        }
-      })
-      .catch((e) => {
-        console.error('Could not get contexts: ', e);
-      });
+  // Dispatch asynchronous request to get all the languages present.
+  chrome.runtime.sendMessage({type: 'get-lang-info-array'}, (langInfoArray) => {
+    this.langInfoArray_ = langInfoArray;
+    this.init();
+  });
 };
-
 
 EspeakTtsOptions.prototype.init = function() {
   this.langInfoArray_.forEach((function(langInfo) {
@@ -83,7 +68,7 @@ EspeakTtsOptions.prototype.onChange = function(event) {
   obj[key] = target.checked;
   chrome.storage.local.set(obj);
   console.log('updating voices');
-  this.engine_.updateVoices();
+  chrome.runtime.sendMessage({type: 'update-voices'});
 
   this.ensureLastVoiceUnremovable();
 };

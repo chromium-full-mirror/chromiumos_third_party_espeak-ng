@@ -133,15 +133,21 @@ class EspeakTtsEngine {
         return;
       }
       switch (request.type) {
-        case 'wasm-worker-initialized':
+        case 'update-voices':
           this.updateVoices();
           break;
         case 'handle-events':
           this.handleEvents(
               request.utteranceId, request.samples, request.events);
           break;
+        case 'get-lang-info-array':
+          let responded = false;
+          this.getLangInfoArray((langInfoArray) => {
+            sendResponse(langInfoArray);
+            responded = true;
+          });
+          return !responded;
         default:
-          console.error(`Unknown type: ${request.type}`);
           break;
       }
     });
@@ -571,17 +577,12 @@ async function init() {
       return;
     }
 
-    // Initialize the engine, and store it in the offscreen page for options.js.
-    if (existingContexts[0].engine == null) {
-      // TODO(b/419896366): Storing it doesn't work due to process boundry. Instead, we
-      // need to expose the EspeakTTSEngine() function calls via message passing
-      // api.
-      existingContexts[0].engine = new EspeakTtsEngine();
+    // Initialize the engine.
+    new EspeakTtsEngine();
 
-      // TODO(b/419881642): Tune the lifetime later.
-      // Keep this instance alive indefinitely.
-      startHeartbeat();
-    }
+    // TODO(b/419881642): Tune the lifetime later.
+    // Keep this instance alive indefinitely.
+    startHeartbeat();
   } else {
     // Do nothing and let the system automatically end this service worker.
   }

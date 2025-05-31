@@ -14,7 +14,8 @@ let tts_ = null;
  *     for.
  * @param {ArrayBuffer?} samples The raw audio data in the form of a
  *     Float32Array.
- * @param {Array?} events Misc. events to pass to the EspeakTTSEngine instance.
+ * @param {Array?} events Determines whether the associated samples are a
+ *     sentence, a word, or the end of the utterance. Passed to EspeakTTSEngine.
  */
 async function handleEvents(utteranceId, samples, events) {
   // `samples` is an ArrayBuffer, and `sendMessage` requires the message to be
@@ -39,7 +40,7 @@ async function handleEvents(utteranceId, samples, events) {
 function updateVoicesInEngine() {
   // This will call this.finishInitialization_() when done, which will
   // initialize the audio worklet.
-  chrome.runtime.sendMessage({type: 'wasm-worker-initialized'});
+  chrome.runtime.sendMessage({type: 'update-voices'});
 }
 
 /**
@@ -119,7 +120,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })();
       return;
     default:
-      console.error(`Unknown type: ${request.type}`);
       break;
   }
 });
