@@ -136,6 +136,10 @@ class EspeakTtsEngine {
         case 'wasm-worker-initialized':
           this.updateVoices();
           break;
+        case 'handle-events':
+          this.handleEvents(
+              request.utteranceId, request.samples, request.events);
+          break;
         default:
           console.error(`Unknown type: ${request.type}`);
           break;
@@ -290,6 +294,42 @@ class EspeakTtsEngine {
   };
 
   /**
+   * Helper function which determines whether a sample is at it's end.
+   * If the sample still has data, the sample is processed in a separate helper.
+   *
+   * @param {number} utteranceId The id of the utterance that the audio buffer is
+   *     for. If the utteranceId is different, the sample is ignored.
+   * @param {ArrayBuffer?} samples The raw audio data in the form of a
+   *     Float32Array.
+   * @param {Array?} events Type of events for each character index.
+   */
+  handleEvents(utteranceId, samples, events) {
+    if (this.utteranceId_ != utteranceId) {
+      return;
+    }
+
+    // 'end' type events can still be followed by audio data. This is a more
+    // reliable way the native code signals end.
+    let isEnd = events === undefined;
+    let charIndex = -1;
+
+    if (events) {
+      for (const event of events) {
+        charIndex = event.text_position;
+
+        switch (event.type) {
+          case 'sentence':
+          case 'word':
+          case 'end':
+            break;
+        }
+      }
+    }
+    const sampleArray = new Float32Array(samples);
+    this.processSamples(sampleArray, charIndex, isEnd);
+  }
+
+  /**
    * Called by the client to start speech synthesis.
    *
    * @param {string} utterance The utterance to say.
@@ -337,34 +377,11 @@ class EspeakTtsEngine {
     const pitch = Math.min(Math.max(Math.floor(options.pitch * 50), 0), 99);
     chrome.runtime.sendMessage({type: 'set_pitch', pitch: pitch});
 
-    const handleEvents = function(utteranceId, samples, events) {
-      if (this.utteranceId_ != utteranceId) {
-        return;
-      }
-
-      // 'end' type events can still be followed by audio data. This is a more
-      // reliable way the native code signals end.
-      let isEnd = events === undefined;
-      let charIndex = -1;
-
-      if (events) {
-        for (const event of events) {
-          charIndex = event.text_position;
-
-          switch (event.type) {
-            case 'sentence':
-            case 'word':
-            case 'end':
-              break;
-          }
-        }
-      }
-      const sampleArray = new Float32Array(samples);
-      this.processSamples(sampleArray, charIndex, isEnd);
-    }
-
-        this.tts_.synthesize(
-            utterance, (handleEvents).bind(this, this.utteranceId_));
+    chrome.runtime.sendMessage({
+      type: 'synthesize',
+      utterance: utterance,
+      utteranceId: this.utteranceId_
+    });
   };
 
   /**
