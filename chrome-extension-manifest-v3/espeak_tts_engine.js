@@ -8,6 +8,84 @@ try {
   console.error('Error importing scripts: ', e);
 }
 
+let espeak_engine_ = null;
+
+chrome.runtime.onMessage.addListener(
+    /**
+     * Handles incoming messages received from `espeak_offscreen.js`, and
+     * `options.js`.
+     * @param {object!} request Data received from some other process sent via
+     *     chrome.runtime.sendMessage.
+     * @param {object!} sender An object containing information about the script
+     *     context that sent a message or request. Has properties such as
+     *     document id, origin, etc.
+     * @param {Function!} sendResponse A callback which responds to the sender,
+     *     and closes the message channel.
+     * @return {boolean|undefined} True if the sendResponse callback will be
+     *     called asynchronously, false or undefined otherwise.
+     */
+    async (request, sender, sendResponse) => {
+      if (espeak_engine_ == null && !await init()) {
+        console.error(
+            'Could not restore service worker while attempting to handle a message from the offscreen document.');
+        return;
+      }
+
+      if (request == null || request.type == null) {
+        console.error('Malformed request: ', request, 'from: ', sender);
+        return;
+      }
+
+      switch (request.type) {
+        case 'update-voices':
+          espeak_engine_.updateVoices();
+          break;
+        case 'handle-events':
+          espeak_engine_.handleEvents(
+              request.utteranceId, request.samples, request.events);
+          break;
+        case 'get-lang-info-array':
+          let responded = false;
+          espeak_engine_.getLangInfoArray((langInfoArray) => {
+            sendResponse(langInfoArray);
+            responded = true;
+          });
+          return !responded;
+        default:
+          break;
+      }
+    });
+
+// Start listening to chrome.ttsEngine requests.
+chrome.ttsEngine.onSpeakWithAudioStream.addListener(
+    /**
+     * Listener parameters when the ttsEngine receives an utterance request.
+     * Parameter definitions mirror `espeak_engine_.onSpeak(..)` defintions,
+     * please use that function as a reference.
+     */
+    async (utterance, options, audioStreamOptions, sendTtsAudio, sendError) => {
+      if (espeak_engine_ == null && !await init()) {
+        console.error(
+            'Could not restore service worker while attempting to handle a speakWithAudioStream event.');
+        return;
+      }
+
+      espeak_engine_.onSpeak(
+          utterance, options, audioStreamOptions, sendTtsAudio, sendError);
+    });
+
+// Clean up when audio stops playing.
+chrome.ttsEngine.onStop.addListener(() => {
+  if (espeak_engine_ == null) {
+    // Engine is terminated, so there is no work to do.
+    return;
+  }
+
+  espeak_engine_.onStop();
+});
+chrome.ttsEngine.onPause.addListener(() => {});
+chrome.ttsEngine.onResume.addListener(() => {});
+
 /**
  * @fileoverview eSpeak text-to-speech extension.
  *
@@ -127,31 +205,6 @@ class EspeakTtsEngine {
      */
     this.initialized_ = false;
 
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request == null || request.type == null) {
-        console.error('Malformed request: ', request, 'from: ', sender);
-        return;
-      }
-      switch (request.type) {
-        case 'update-voices':
-          this.updateVoices();
-          break;
-        case 'handle-events':
-          this.handleEvents(
-              request.utteranceId, request.samples, request.events);
-          break;
-        case 'get-lang-info-array':
-          let responded = false;
-          this.getLangInfoArray((langInfoArray) => {
-            sendResponse(langInfoArray);
-            responded = true;
-          });
-          return !responded;
-        default:
-          break;
-      }
-    });
-
     // Service workers (like this one), cannot spawn dedicated workers.
     // Call the offscreen page to create an instance of dedicated worker for
     // this service worker to use.
@@ -171,13 +224,6 @@ class EspeakTtsEngine {
         });
       }
     });
-
-    // Start listening to chrome.ttsEngine requests.
-    chrome.ttsEngine.onSpeakWithAudioStream.addListener(
-        this.onSpeak.bind(this));
-    chrome.ttsEngine.onStop.addListener(this.onStop.bind(this));
-    chrome.ttsEngine.onPause.addListener(() => {});
-    chrome.ttsEngine.onResume.addListener(() => {});
   }
 
   /**
@@ -478,44 +524,6 @@ class EspeakTtsEngine {
 }
 
 /**
- * Tracks when a service worker was last alive and extends the service worker
- * lifetime by writing the current time to extension storage every 20 seconds.
- * You should still prepare for unexpected termination - for example, if the
- * extension process crashes or your extension is manually stopped at
- * chrome://serviceworker-internals.
- */
-let heartbeatInterval;
-
-/**
- * Writes to storage to keep the service worker alive (prevents system from
- * cleaning up this service worker).
- */
-async function runHeartbeat() {
-  await chrome.storage.local.set({ 'last-heartbeat': new Date().getTime() });
-}
-
-/**
- * Starts the heartbeat interval which keeps the service worker alive. Call
- * this sparingly when you are doing work which requires persistence, and call
- * stopHeartbeat once that work is complete.
- */
-async function startHeartbeat() {
-  // Run the heartbeat once at service worker startup.
-  runHeartbeat().then(() => {
-    // Then again every 20 seconds.
-    heartbeatInterval = setInterval(runHeartbeat, 20 * 1000);
-  });
-}
-
-/**
- * Stops the heartbeat which means that the system will clean up the service
- * worker after 30 seconds of inactivity.
- */
-async function stopHeartbeat() {
-  clearInterval(heartbeatInterval);
-}
-
-/**
  * Creates a new offscreen document if one doesn't already exist. If it does,
  * this function results in a no-op.
  *
@@ -557,6 +565,9 @@ async function maybeSetupOffscreenDocument() {
 /**
  * Creates a new EspeakTTSEngine, and then stores it in an offscreen page which
  * will be used by the options.html page.
+ *
+ * @return {boolean} Whether an instance of EspeakTtsEngine() was initialized
+ *     successfully.
  */
 async function init() {
   // In 'split' manifest mode, the extension system runs two copies of the
@@ -574,18 +585,17 @@ async function init() {
     if (existingContexts.length === 0) {
       console.error(
           'Failed to create offscreen page, so Espeak TTS engine cannot be initialized.');
-      return;
+      return false;
     }
 
     // Initialize the engine.
-    new EspeakTtsEngine();
+    espeak_engine_ = new EspeakTtsEngine();
 
-    // TODO(b/419881642): Tune the lifetime later.
-    // Keep this instance alive indefinitely.
-    startHeartbeat();
-  } else {
-    // Do nothing and let the system automatically end this service worker.
+    return true;
   }
+
+  // Do nothing and let the system automatically end this service worker.
+  return false;
 }
 
 // Create the TTSEngine in the Chrome Extension.

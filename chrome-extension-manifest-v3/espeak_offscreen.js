@@ -51,6 +51,12 @@ function updateVoicesInEngine() {
  */
 function createWasmWorker() {
   try {
+    if (tts_) {
+      // Update the voices if a wasm worker already exists, and return.
+      updateVoicesInEngine();
+      return true;
+    }
+
     tts_ = new eSpeakNG('js/espeakng_worker.js', updateVoicesInEngine);
     return true;
   } catch (e) {
