@@ -26,7 +26,7 @@ async function handleEvents(utteranceId, samples, events) {
   // audio via the chrome.ttsEngine.* API.
   const jsonSamples = Array.apply(null, new Float32Array(samples));
   await chrome.runtime.sendMessage({
-    type: 'handle-events',
+    type: HANDLE_EVENTS_MSG,
     utteranceId,
     samples: jsonSamples,
     events: structuredClone(events)
@@ -40,7 +40,7 @@ async function handleEvents(utteranceId, samples, events) {
 function updateVoicesInEngine() {
   // This will call this.finishInitialization_() when done, which will
   // initialize the audio worklet.
-  chrome.runtime.sendMessage({type: 'update-voices'});
+  chrome.runtime.sendMessage({type: UPDATE_VOICES_MSG});
 }
 
 /**
@@ -60,7 +60,7 @@ function createWasmWorker() {
     tts_ = new eSpeakNG('js/espeakng_worker.js', updateVoicesInEngine);
     return true;
   } catch (e) {
-    console.error('create-wasm-worker-failure: ', e);
+    console.error(`${CREATE_WASM_WORKER_FAILURE_MSG}: `, e);
     return false;
   }
 }
@@ -72,9 +72,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   // If the request is a creation request, honor that first.
-  if (request.type === 'create-wasm-worker') {
+  if (request.type === CREATE_WASM_WORKER_MSG) {
     sendResponse({
-      type: `create-wasm-worker-${createWasmWorker() ? 'success' : 'failure'}`
+      type: createWasmWorker() ? CREATE_WASM_WORKER_SUCCESS_MSG :
+                                 CREATE_WASM_WORKER_FAILURE_MSG,
     });
     return;
   }
@@ -88,7 +89,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   switch (request.type) {
-    case 'list_voices':
+    case LIST_VOICES_MSG:
       (async () => {
         const langInfoArray = await new Promise(resolve =>
           tts_.list_voices(resolve)
@@ -98,27 +99,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       // Return to indicate that the response is being sent asynchronously.
       return true;
-    case 'set_voice':
+    case SET_VOICE_MSG:
       (async () => {
         await tts_.set_voice(request.voiceName);
       })();
       return;
-    case 'set_system_sample_rate':
+    case SET_SYSTEM_SAMPLE_RATE_MSG:
       (async () => {
         await tts_.set_systemSampleRate(request.sampleRate);
       })();
       return;
-    case 'set_rate':
+    case SET_RATE_MSG:
       (async () => {
         await tts_.set_rate(request.rate);
       })();
       return;
-    case 'set_pitch':
+    case SET_PITCH_MSG:
       (async () => {
         await tts_.set_pitch(request.pitch);
       })();
       return;
-    case 'synthesize':
+    case SYNTHESIZE_MSG:
       (async () => {
         await tts_.synthesize(request.utterance, async (samples, events) => {
           await handleEvents(request.utteranceId, samples, events);

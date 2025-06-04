@@ -17,7 +17,7 @@ function $(id) {
  */
 let EspeakTtsOptions = function() {
   // Dispatch asynchronous request to get all the languages present.
-  chrome.runtime.sendMessage({type: 'get-lang-info-array'}, (langInfoArray) => {
+  chrome.runtime.sendMessage({type: GET_LANG_INFO_ARRAY_MSG}, (langInfoArray) => {
     this.langInfoArray_ = langInfoArray;
     this.init();
   });
@@ -68,7 +68,7 @@ EspeakTtsOptions.prototype.onChange = function(event) {
   obj[key] = target.checked;
   chrome.storage.local.set(obj);
   console.log('updating voices');
-  chrome.runtime.sendMessage({type: 'update-voices'});
+  chrome.runtime.sendMessage({type: UPDATE_VOICES_MSG});
 
   this.ensureLastVoiceUnremovable();
 };
