@@ -20,7 +20,11 @@
 #ifndef ESPEAK_NG_SPEECH_H
 #define ESPEAK_NG_SPEECH_H
 
-#include <endian.h>               // for BYTE_ORDER, BIG_ENDIAN
+#if defined(__APPLE__)
+#include <sys/endian.h>
+#else
+#include <endian.h>
+#endif  // for BYTE_ORDER, BIG_ENDIAN
 #include <espeak-ng/espeak_ng.h>
 
 #if defined(__has_feature)
